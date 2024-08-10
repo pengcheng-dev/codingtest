@@ -186,6 +186,8 @@ public class EntryTransactionRepositoryTest {
         assertEquals("Investment", optional.get().getEntry().getEntryType());
         assertEquals(123456L, optional.get().getAccount().getAccountID());
         assertEquals("abc", optional.get().getAccount().getName());
+        Object entryObject = optional.get().getEntry();
+        assertTrue(entryObject instanceof InvestmentEntry);
     }
 
     @Test
@@ -225,5 +227,49 @@ public class EntryTransactionRepositoryTest {
         assertEquals(new BigDecimal("11.50"), updatedET.getEntry().getAmount());
         assertEquals(123456L, updatedET.getAccount().getAccountID());
         assertEquals("abc", updatedET.getAccount().getName());
+    }
+
+    @Test
+    public void testFindAllBriefs(){
+        //given
+
+        //when
+        List<EntryTransaction> list = entryTransactionRepository.findAllBriefs();
+
+        //then
+        assert(list.isEmpty());
+    }
+
+    @Test
+    public void testSaveAndFindAllBriefs(){
+        //given
+        BasicBankEntry entry = new BasicBankEntry();
+        entry.setAmount(new BigDecimal("10.50"));
+        entry.setGstAmount(new BigDecimal("12.50"));
+        entry.setField1("_blank");
+
+        //the incomplete account object will be cached
+        Account account = new Account();
+        account.setId(accountId);
+
+        EntryTransaction et = new EntryTransaction();
+        et.setEntry(entry);
+        et.setAccount(account);
+
+        et.setAmount(new BigDecimal("10.50"));
+        et.setFundId("123456");
+        et.setType("sample");
+        et.setTransactionDate(new Date());
+
+        EntryTransaction savedET = entryTransactionRepository.save(et);
+
+        //when
+        List<EntryTransaction> list = entryTransactionRepository.findAllBriefs();
+        assertEquals(1, list.size());
+        assertNotNull(list.get(0).getId());
+        assertEquals("123456", list.get(0).getFundId());
+        assertNotNull(list.get(0).getEntry().getId());
+        assertEquals("BasicBank", list.get(0).getEntry().getEntryType());
+        assertEquals(new BigDecimal("10.50"), list.get(0).getEntry().getAmount());
     }
 }

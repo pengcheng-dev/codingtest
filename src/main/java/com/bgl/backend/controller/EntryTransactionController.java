@@ -1,5 +1,7 @@
 package com.bgl.backend.controller;
 
+import com.bgl.backend.controller.DTO.EntryTransactionBrief;
+import com.bgl.backend.controller.DTO.EntryTransactionDetail;
 import com.bgl.backend.model.EntryTransaction;
 import com.bgl.backend.service.IEntryTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +17,15 @@ public class EntryTransactionController {
     IEntryTransactionService entryTransactionService;
 
     @GetMapping (value = "/{id}")
-    public EntryTransaction findById(@PathVariable("id") Long id){
-        return entryTransactionService.findById(id);
+    public EntryTransactionDetail findById(@PathVariable("id") Long id){
+        EntryTransaction entryTransaction= entryTransactionService.findDetailById(id);
+        return null;
     }
 
     @GetMapping
-    public List<EntryTransaction> findAll(){
-        return entryTransactionService.findAll();
+    public List<EntryTransactionBrief> findAll(){
+        List<EntryTransaction> entryTransactionList = entryTransactionService.findAllBriefs();
+        return null;
     }
 
     @DeleteMapping (value = "/{id}")
@@ -35,8 +39,9 @@ public class EntryTransactionController {
     }
 
     @PostMapping
-    public EntryTransaction save(@RequestBody EntryTransaction entryTransaction){
+    public EntryTransaction create(@RequestBody EntryTransactionDetail entryTransactionDetail){
         try {
+            EntryTransaction entryTransaction = new EntryTransaction();
             return entryTransactionService.save(entryTransaction);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -44,8 +49,9 @@ public class EntryTransactionController {
     }
 
     @PutMapping (value = "/{id}")
-    public EntryTransaction update(@RequestBody EntryTransaction entryTransaction,@PathVariable Long id){
+    public EntryTransaction update(@RequestBody EntryTransactionDetail entryTransactionDetail,@PathVariable Long id){
         try {
+            EntryTransaction entryTransaction = new EntryTransaction();
             return entryTransactionService.update(id, entryTransaction);
         } catch (Exception e) {
             throw new RuntimeException(e);

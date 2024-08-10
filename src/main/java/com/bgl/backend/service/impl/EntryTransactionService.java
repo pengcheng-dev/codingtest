@@ -16,16 +16,6 @@ public class EntryTransactionService implements IEntryTransactionService {
     EntryTransactionRepository entryTransactionRepository;
 
     @Override
-    public EntryTransaction findById(Long id){
-        return entryTransactionRepository.findById(id).get();
-    }
-
-    @Override
-    public List<EntryTransaction> findAll() {
-        return entryTransactionRepository.findAll();
-    }
-
-    @Override
     @Transactional
     public EntryTransaction save(EntryTransaction entryTransaction) throws Exception {
         return entryTransactionRepository.save(entryTransaction);
@@ -40,5 +30,15 @@ public class EntryTransactionService implements IEntryTransactionService {
     @Transactional
     public void delete(Long id) throws Exception {
         entryTransactionRepository.deleteById(id);
+    }
+
+    @Override
+    public EntryTransaction findDetailById(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<EntryTransaction> findAllBriefs() {
+        return List.of();
     }
 }

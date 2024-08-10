@@ -11,6 +11,15 @@ import java.util.Date;
 @Data
 @Entity
 @Table (name = "TEntryTransaction")
+
+@NamedEntityGraph(
+        name = "EntryTransaction.accountAndEntryBrief",
+        attributeNodes = {
+                @NamedAttributeNode("account"),
+                @NamedAttributeNode("entry")
+        }
+)
+
 public class EntryTransaction {
 
     @Id
@@ -22,7 +31,7 @@ public class EntryTransaction {
     @JoinColumn (name = "acctId", nullable=false)
     private Account account;
 
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn (name = "entryId", nullable = false)
     private Entry entry;
 
