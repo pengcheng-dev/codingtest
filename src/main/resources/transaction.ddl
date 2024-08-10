@@ -1,18 +1,3 @@
-CREATE TABLE `TEntryTransaction` (
-`id` bigint NOT NULL AUTO_INCREMENT,
-`acctId` bigint DEFAULT NULL,
-`entryId` bigint NOT NULL,
-`type` varchar(30) NOT NULL,
-`amount` decimal(20,2) NOT NULL,
-`transactionDate` date NOT NULL,
-`fundId` varchar(32) NOT NULL,
-`date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-`last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON
-UPDATE CURRENT_TIMESTAMP,
-PRIMARY KEY (`id`),
-CONSTRAINT `FK_TEntryTransaction_Acct` FOREIGN KEY (acctId) REFERENCES TAccount(id),
-CONSTRAINT `FK_TEntryTransaction_Entry` FOREIGN KEY (entryId) REFERENCES TEntry(id)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE `TAccount` (
 `id` bigint NOT NULL AUTO_INCREMENT,
@@ -42,9 +27,9 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `TAccountTag` (
 `tagID` bigint NOT NULL,
-`tAccountID` bigint NOT NULL,
+`accountID` bigint NOT NULL,
 PRIMARY KEY (`tAccountID`,`tagID`),
-CONSTRAINT `FK_TAccountTag_TAccount` FOREIGN KEY (`taccountID`)
+CONSTRAINT `FK_TAccountTag_TAccount` FOREIGN KEY (`accountID`)
 REFERENCES `TAccount` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
 CONSTRAINT `FK_TAccountTag_TAccountTags` FOREIGN KEY (`tagID`)
 REFERENCES `TAccountTags` (`id`) ON DELETE RESTRICT ON UPDATE
@@ -93,3 +78,19 @@ CREATE TABLE TContributionEntry (
     field2 DECIMAL(20, 2),
     CONSTRAINT `FK_TContributionEntry_TEntry` FOREIGN KEY (id) REFERENCES TEntry(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `TEntryTransaction` (
+`id` bigint NOT NULL AUTO_INCREMENT,
+`acctId` bigint DEFAULT NULL,
+`entryId` bigint NOT NULL,
+`type` varchar(30) NOT NULL,
+`amount` decimal(20,2) NOT NULL,
+`transactionDate` date NOT NULL,
+`fundId` varchar(32) NOT NULL,
+`date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON
+UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`),
+CONSTRAINT `FK_TEntryTransaction_Acct` FOREIGN KEY (acctId) REFERENCES TAccount(id),
+CONSTRAINT `FK_TEntryTransaction_Entry` FOREIGN KEY (entryId) REFERENCES TEntry(id)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
