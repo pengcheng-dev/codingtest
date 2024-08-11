@@ -1,14 +1,11 @@
 package com.bgl.backend.controller.DTO;
 
-import com.bgl.backend.model.Account;
-import com.bgl.backend.model.Entry;
-import jakarta.persistence.*;
+
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Map;
 
 @Data
 public class EntryTransactionBrief {
@@ -33,9 +30,9 @@ public class EntryTransactionBrief {
 
     private Long accountId;
 
-    private String code;
+    private String accountCode;
 
-    private String name;
+    private String accountName;
 
     private String accountClass;
 

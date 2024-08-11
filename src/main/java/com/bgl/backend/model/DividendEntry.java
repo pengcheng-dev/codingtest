@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 @Entity
-@Table (name = "DividendEntry")
+@Table (name = "TDividendEntry")
 @PrimaryKeyJoinColumn (name = "id")
 public class DividendEntry extends Entry{
 
