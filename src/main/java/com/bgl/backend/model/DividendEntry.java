@@ -5,14 +5,18 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * Dividend entity, a subtype of Entry entity, has own specific additional fields
+ */
 @Data
 @Entity
 @Table (name = "TDividendEntry")
 @PrimaryKeyJoinColumn (name = "id")
 public class DividendEntry extends Entry{
 
-    @PrePersist
-    private void prePersist(){
+    public DividendEntry(){
         this.setEntryType("Dividend");
     }
 

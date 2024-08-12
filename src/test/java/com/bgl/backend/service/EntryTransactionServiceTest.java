@@ -10,10 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,7 +55,7 @@ public class EntryTransactionServiceTest {
 
         et.setType("ABC");
         et.setFundId("123456");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
         Account account = new Account();
@@ -85,7 +90,7 @@ public class EntryTransactionServiceTest {
 
         et.setType("ABC");
         et.setFundId("123456");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
         Account account = new Account();
@@ -119,7 +124,7 @@ public class EntryTransactionServiceTest {
         et.setId(1L);
         et.setType("ABC");
         et.setFundId("123456");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
         Account account = new Account();
@@ -174,8 +179,13 @@ public class EntryTransactionServiceTest {
 
     @Test
     public void testFindAllBriefs() {
-        when(entryTransactionRepository.findAllBriefs()).thenReturn(List.of(new EntryTransaction()));
+        Page<EntryTransaction> page = new PageImpl<>(Arrays.asList(new EntryTransaction()));
+        when(entryTransactionRepository.findAllBriefs(any(Pageable.class))).thenReturn(page);
 
-        assertFalse(entryTransactionService.findAllBriefs().isEmpty());
+        Page<EntryTransaction> result = entryTransactionService.findAllBriefs(PageRequest.of(0, 10));
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+
+        verify(entryTransactionRepository).findAllBriefs(any(Pageable.class));
     }
 }

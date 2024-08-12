@@ -5,12 +5,21 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDate;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ *  Entry transaction entity, main entity of this project, reference to an account
+ */
 @Data
 @Entity
 @Table (name = "TEntryTransaction")
 
+/**
+ * select common fields of entry entity only for list display
+ * do not fetch additional fields specified for each sub entry entity
+ */
 @NamedEntityGraph(
         name = "EntryTransaction.accountAndEntryBrief",
         attributeNodes = {
@@ -26,12 +35,20 @@ public class EntryTransaction implements Cloneable{
     @Column (name = "id")
     private Long id;
 
+    /**
+     * foreign reference to an account
+     */
     @ManyToOne
     @JoinColumn (name = "acctId", nullable=false)
     private Account account;
 
-    @OneToOne (cascade = CascadeType.ALL)
-    @JoinColumn (name = "entryId", nullable = false)
+    /**
+     * create an entry transaction record will create an entry record automatically,
+     * if entry type updated, a new entry recorded will be created and referenced to the entry transaction,
+     * the original entry record should be deleted to keep data integrity.
+     */
+    @OneToOne (cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn (name = "entryId", referencedColumnName = "id", nullable = false)
     private Entry entry;
 
     @Column (name = "type", nullable = false)
@@ -41,7 +58,7 @@ public class EntryTransaction implements Cloneable{
     private BigDecimal amount;
 
     @Column (name = "transactionDate", nullable = false)
-    private Date transactionDate;
+    private LocalDate transactionDate;
 
     @Column (name = "fundId", nullable = false)
     private String fundId;

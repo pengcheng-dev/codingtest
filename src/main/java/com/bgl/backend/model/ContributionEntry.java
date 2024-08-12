@@ -5,13 +5,18 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * Contribution entity, a subtype of Entry entity, has own specific additional fields
+ */
 @Data
 @Entity
 @Table (name = "TContribution")
 @PrimaryKeyJoinColumn (name = "id")
 public class ContributionEntry extends Entry{
-    @PrePersist
-    private void prePersist(){
+
+    public ContributionEntry(){
         this.setEntryType("Contribution");
     }
 

@@ -9,16 +9,18 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Map;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * DTO defined for detailed display and updating, including specific additional fields for each subtype entry
+ */
 @Data
 @Validated
 public class EntryTransactionDetail {
 
     @Null(groups = Create.class)
-    @NotNull(groups = Update.class)
     private Long id;
 
     @NotBlank
@@ -28,23 +30,22 @@ public class EntryTransactionDetail {
     private BigDecimal amount;
 
     @NotNull
-    private Date transactionDate;
+    private String transactionDate;
 
     @NotBlank
     private String fundId;
 
     @Null
-    private Timestamp dateCreated;
+    private String dateCreated;
 
     @Null
-    private Timestamp lastUpdated;
+    private String lastUpdated;
 
     //account part
 
     @NotNull
     private Long accountIncrementalId;
 
-    @NotNull
     private Long accountId;
 
     private String accountCode;

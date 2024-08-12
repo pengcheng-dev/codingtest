@@ -3,6 +3,11 @@ package com.bgl.backend.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * AccountTags entity, not used
+ */
 @Data
 @Entity
 @Table (name = "TAccountTags")

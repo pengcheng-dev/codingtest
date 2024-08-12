@@ -1,10 +1,13 @@
 package com.bgl.backend.service;
 
 import com.bgl.backend.model.EntryTransaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
+/**
+ * @author Pengcheng Xiao
+ */
 @Component
 public interface IEntryTransactionService {
 
@@ -13,5 +16,5 @@ public interface IEntryTransactionService {
     void delete(Long id) throws Exception;
 
     EntryTransaction findDetailById(Long id);
-    List<EntryTransaction> findAllBriefs();
+    Page<EntryTransaction> findAllBriefs(Pageable pageable);
 }

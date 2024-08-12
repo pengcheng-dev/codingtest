@@ -5,14 +5,18 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * Investment entity, a subtype of Entry entity, has own specific additional fields
+ */
 @Data
 @Entity
 @Table (name = "TInvestmentEntry")
 @PrimaryKeyJoinColumn (name = "id")
 public class InvestmentEntry extends Entry{
 
-    @PrePersist
-    private void prePersist(){
+    public InvestmentEntry(){
         this.setEntryType("Investment");
     }
 

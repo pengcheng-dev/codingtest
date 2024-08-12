@@ -5,8 +5,13 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDate;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * DTO defined for list display, only include common fields in an entry transaction entity
+ */
 @Data
 public class EntryTransactionBrief {
 
@@ -16,13 +21,13 @@ public class EntryTransactionBrief {
 
     private BigDecimal amount;
 
-    private Date transactionDate;
+    private String transactionDate;
 
     private String fundId;
 
-    private Timestamp dateCreated;
+    private String dateCreated;
 
-    private Timestamp lastUpdated;
+    private String lastUpdated;
 
     //account part
 

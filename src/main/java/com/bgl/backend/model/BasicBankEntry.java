@@ -5,14 +5,18 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * BasicBank entity, a subtype of Entry entity, has own specific additional fields
+ */
 @Data
 @Entity
 @Table (name = "TBasicBankEntry")
 @PrimaryKeyJoinColumn (name = "id")
 public class BasicBankEntry extends Entry{
 
-        @PrePersist
-        private void prePersist(){
+        public BasicBankEntry(){
                 this.setEntryType("BasicBank");
         }
 

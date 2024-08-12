@@ -6,9 +6,12 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +82,7 @@ public class EntryTransactionRepositoryTest {
         et.setAmount(new BigDecimal("10.50"));
         et.setFundId("123456");
         et.setType("sample");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
 
         //when
         EntryTransaction savedET = entryTransactionRepository.save(et);
@@ -112,7 +115,7 @@ public class EntryTransactionRepositoryTest {
         et.setAmount(new BigDecimal("10.50"));
         et.setFundId("123456");
         et.setType("sample");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
 
         //when
         EntryTransaction savedET = entryTransactionRepository.save(et);
@@ -145,7 +148,7 @@ public class EntryTransactionRepositoryTest {
         et.setAmount(new BigDecimal("10.50"));
         et.setFundId("123456");
         et.setType("sample");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
 
         //when
         EntryTransaction savedET = entryTransactionRepository.save(et);
@@ -174,7 +177,7 @@ public class EntryTransactionRepositoryTest {
         et.setAmount(new BigDecimal("10.50"));
         et.setFundId("123456");
         et.setType("sample");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
 
         //when
         EntryTransaction savedET = entryTransactionRepository.save(et);
@@ -208,7 +211,7 @@ public class EntryTransactionRepositoryTest {
         et.setAmount(new BigDecimal("10.50"));
         et.setFundId("123456");
         et.setType("sample");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
 
         EntryTransaction savedET = entryTransactionRepository.save(et);
 
@@ -231,13 +234,10 @@ public class EntryTransactionRepositoryTest {
 
     @Test
     public void testFindAllBriefs(){
-        //given
-
-        //when
-        List<EntryTransaction> list = entryTransactionRepository.findAllBriefs();
-
-        //then
-        assert(list.isEmpty());
+        Page<EntryTransaction> page = entryTransactionRepository.findAllBriefs(PageRequest.of(0, 10));
+        assertNotNull(page);
+        assertEquals(0, page.getTotalPages());
+        assertEquals(0, page.getTotalElements());
     }
 
     @Test
@@ -259,17 +259,21 @@ public class EntryTransactionRepositoryTest {
         et.setAmount(new BigDecimal("10.50"));
         et.setFundId("123456");
         et.setType("sample");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
 
         EntryTransaction savedET = entryTransactionRepository.save(et);
 
         //when
-        List<EntryTransaction> list = entryTransactionRepository.findAllBriefs();
-        assertEquals(1, list.size());
-        assertNotNull(list.get(0).getId());
-        assertEquals("123456", list.get(0).getFundId());
-        assertNotNull(list.get(0).getEntry().getId());
-        assertEquals("BasicBank", list.get(0).getEntry().getEntryType());
-        assertEquals(new BigDecimal("10.50"), list.get(0).getEntry().getAmount());
+        Page<EntryTransaction> page = entryTransactionRepository.findAllBriefs(PageRequest.of(0, 10));
+        assertEquals(1, page.getTotalElements());
+        Optional<EntryTransaction> optional = page.stream().findFirst();
+
+        assertTrue(optional.isPresent());
+
+        assertNotNull(optional.get().getId());
+        assertEquals("123456", optional.get().getFundId());
+        assertNotNull(optional.get().getEntry().getId());
+        assertEquals("BasicBank", optional.get().getEntry().getEntryType());
+        assertEquals(new BigDecimal("10.50"), optional.get().getEntry().getAmount());
     }
 }

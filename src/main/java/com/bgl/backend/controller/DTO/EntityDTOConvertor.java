@@ -3,11 +3,29 @@ package com.bgl.backend.controller.DTO;
 import com.bgl.backend.model.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * a helper convert from entity to brief DTO for list display, unify time formatter as well,
+ * convert entity to detail DTO for updating, and help controller converting DTO to entity
+ */
+
 public class EntityDTOConvertor {
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH-mm-ss");
     // DTO to Entity Mapping Methods
+
+    /**
+     * convert detail DTO received form client to entity
+     * @param detailDTO
+     * @return
+     */
     public static EntryTransaction mapToEntity(EntryTransactionDetail detailDTO) {
 
         EntryTransaction et = new EntryTransaction();
@@ -15,15 +33,13 @@ public class EntityDTOConvertor {
         et.setType(detailDTO.getType());
         et.setFundId(detailDTO.getFundId());
         et.setAmount(detailDTO.getAmount());
+        et.setTransactionDate(LocalDate.parse(detailDTO.getTransactionDate(), DATE_FORMATTER));
 
         Account account = new Account();
         account.setId(detailDTO.getAccountIncrementalId());
-        account.setAccountID(detailDTO.getAccountId());
-        account.setCode(detailDTO.getAccountCode());
-        account.setName(detailDTO.getAccountName());
-        account.setAccountClass(detailDTO.getAccountClass());
         et.setAccount(account);
 
+        //backend side and frontend side need to know entry types and specific additional fields for each subtype
         switch (detailDTO.getEntryType()){
             case "BasicBank":
                 BasicBankEntry basicBankEntry = new BasicBankEntry();
@@ -74,7 +90,11 @@ public class EntityDTOConvertor {
         return et;
     }
 
-    // Entity to DTO Mapping Methods
+    /**
+     * convert entity to detail DTO for updating or detail view
+     * @param entryTransaction
+     * @return
+     */
     public static EntryTransactionDetail mapToDetailDTO(EntryTransaction entryTransaction) {
         // Implement the mapping logic from EntryTransaction entity to EntryTransactionDetail DTO
 
@@ -83,7 +103,7 @@ public class EntityDTOConvertor {
         detailDTO.setType(entryTransaction.getType());
         detailDTO.setFundId(entryTransaction.getFundId());
         detailDTO.setAmount(entryTransaction.getAmount());
-        detailDTO.setTransactionDate(entryTransaction.getTransactionDate());
+        detailDTO.setTransactionDate(entryTransaction.getTransactionDate().format(DATE_FORMATTER));
 
         detailDTO.setAccountIncrementalId(entryTransaction.getAccount().getId());
         detailDTO.setAccountId(entryTransaction.getAccount().getAccountID());
@@ -106,7 +126,7 @@ public class EntityDTOConvertor {
                 nameValueMap.put("Field1", ((ContributionEntry)entryTransaction.getEntry()).getField1());
                 nameValueMap.put("Field2", ((ContributionEntry)entryTransaction.getEntry()).getField2());
                 break;
-            case "Distribution":
+            case "DistributionInterest":
                 nameValueMap.put("Field1", ((DistributionInterestEntry)entryTransaction.getEntry()).getField1());
                 nameValueMap.put("Field2", ((DistributionInterestEntry)entryTransaction.getEntry()).getField2());
                 break;
@@ -123,6 +143,11 @@ public class EntityDTOConvertor {
         return detailDTO;
     }
 
+    /**
+     * convert entity list to DTO list for list display, only display common fields
+     * @param entryTransaction
+     * @return
+     */
     public static EntryTransactionBrief mapToBriefDTO(EntryTransaction entryTransaction) {
         // Implement the mapping logic from EntryTransaction entity to EntryTransactionDetail DTO
 
@@ -131,10 +156,14 @@ public class EntityDTOConvertor {
         briefDTO.setType(entryTransaction.getType());
         briefDTO.setFundId(entryTransaction.getFundId());
         briefDTO.setAmount(entryTransaction.getAmount());
+        briefDTO.setTransactionDate(entryTransaction.getTransactionDate().format(DATE_FORMATTER));
+        briefDTO.setDateCreated(entryTransaction.getDateCreated().toLocalDateTime().format(DATE_TIME_FORMATTER));
+        briefDTO.setLastUpdated(entryTransaction.getLastUpdated().toLocalDateTime().format(DATE_TIME_FORMATTER));
 
         briefDTO.setAccountIncrementalId(entryTransaction.getAccount().getId());
         briefDTO.setAccountId(entryTransaction.getAccount().getAccountID());
         briefDTO.setAccountCode(entryTransaction.getAccount().getCode());
+        briefDTO.setAccountType(entryTransaction.getAccount().getAccountType());
         briefDTO.setAccountName(entryTransaction.getAccount().getName());
         briefDTO.setAccountClass(entryTransaction.getAccount().getAccountClass());
 

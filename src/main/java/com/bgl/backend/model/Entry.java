@@ -5,6 +5,11 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * parent entity, define common fields of all entry types
+ */
 @Data
 @Entity
 @Inheritance (strategy = InheritanceType.JOINED)

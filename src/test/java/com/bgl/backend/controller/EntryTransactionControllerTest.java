@@ -6,36 +6,40 @@ import com.bgl.backend.controller.DTO.EntryTransactionDetail;
 import com.bgl.backend.model.Account;
 import com.bgl.backend.model.BasicBankEntry;
 import com.bgl.backend.model.EntryTransaction;
-import com.bgl.backend.service.IEntryTransactionService;
+import com.bgl.backend.service.impl.EntryTransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(EntryTransactionController.class)
 public class EntryTransactionControllerTest {
 
-    @Mock
-    private IEntryTransactionService entryTransactionService;
+    @MockBean
+    private EntryTransactionService entryTransactionService;
 
-    @InjectMocks
-    private EntryTransactionController entryTransactionController;
-
+    @Autowired
     private MockMvc mockMvc;
 
     private ObjectMapper objectMapper;
@@ -43,7 +47,6 @@ public class EntryTransactionControllerTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(entryTransactionController).build();
         objectMapper = new ObjectMapper();
     }
 
@@ -55,6 +58,7 @@ public class EntryTransactionControllerTest {
         et.setId(id);
         et.setType("ABC");
         et.setFundId("123456");
+        et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
         Account account = new Account();
@@ -104,14 +108,64 @@ public class EntryTransactionControllerTest {
     }
 
     @Test
-    public void testFindAll() throws Exception {
-        List<EntryTransactionBrief> briefList = new ArrayList<>();
-        briefList.add(new EntryTransactionBrief());
+    public void testFindAll_WithInvalidBrief() throws Exception {
+        List<EntryTransaction> list = new ArrayList<>();
+        list.add(new EntryTransaction());
 
-        when(entryTransactionService.findAllBriefs()).thenReturn(new ArrayList<>());
+        Page<EntryTransaction> page = new PageImpl<>(list);
 
-        mockMvc.perform(get("/entrytransaction"))
-                .andExpect(status().isOk());
+        when(entryTransactionService.findAllBriefs(any(Pageable.class))).thenReturn(page);
+
+        mockMvc.perform(get("/entrytransaction")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    public void testFindAll_WithValidBrief() throws Exception {
+
+        EntryTransaction et = new EntryTransaction();
+        et.setId(1L);
+        et.setType("ABC");
+        et.setFundId("123456");
+        et.setAmount(new BigDecimal("12.45"));
+        et.setTransactionDate(LocalDate.now());
+        et.setDateCreated(new Timestamp(System.currentTimeMillis()));
+        et.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+
+        Account account = new Account();
+        account.setId(1L);
+        account.setAccountID(123456L);
+        account.setCode("Code-123");
+        account.setName("abc");
+        account.setAccountClass("xyz");
+        et.setAccount(account);
+
+        BasicBankEntry entry = new BasicBankEntry();
+        entry.setId(1L);
+        entry.setEntryType("BasicBank");
+        entry.setAmount(new BigDecimal("123.12"));
+        entry.setGstAmount(new BigDecimal("125.90"));
+//        entry.setField1("");
+//        entry.setField2(new BigDecimal("12.12"));
+        et.setEntry(entry);
+
+
+        List<EntryTransaction> list = new ArrayList<>();
+        list.add(et);
+
+        Page<EntryTransaction> page = new PageImpl<>(list);
+
+        when(entryTransactionService.findAllBriefs(any(Pageable.class))).thenReturn(page);
+
+        mockMvc.perform(get("/entrytransaction")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -142,6 +196,7 @@ public class EntryTransactionControllerTest {
         et.setType("ABC");
         et.setFundId("123456");
         et.setAmount(new BigDecimal("12.45"));
+        et.setTransactionDate(LocalDate.now());
 
         Account account = new Account();
         account.setId(1L);
@@ -176,7 +231,7 @@ public class EntryTransactionControllerTest {
         EntryTransaction et = new EntryTransaction();
         et.setType("ABC");
         et.setFundId("123456");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
         Account account = new Account();
@@ -220,7 +275,7 @@ public class EntryTransactionControllerTest {
         et.setId(id);
         et.setType("ABC");
         et.setFundId("123456");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
         Account account = new Account();
@@ -260,7 +315,7 @@ public class EntryTransactionControllerTest {
         EntryTransaction et = new EntryTransaction();
         et.setType("ABC");
         et.setFundId("123456");
-        et.setTransactionDate(new Date());
+        et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
         Account account = new Account();

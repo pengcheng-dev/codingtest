@@ -5,13 +5,19 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * DistributionInterest entity, a subtype of Entry entity, has own specific additional fields
+ */
+
 @Data
 @Entity
 @Table (name = "TDistributionInterest")
 @PrimaryKeyJoinColumn (name = "id")
 public class DistributionInterestEntry extends Entry{
-    @PrePersist
-    private void prePersist(){
+
+    public DistributionInterestEntry(){
         this.setEntryType("DistributionInterest");
     }
 

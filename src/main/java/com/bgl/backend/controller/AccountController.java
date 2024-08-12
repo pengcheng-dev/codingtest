@@ -1,0 +1,60 @@
+package com.bgl.backend.controller;
+
+import com.bgl.backend.model.Account;
+import com.bgl.backend.service.IAccountService;
+import com.bgl.backend.service.impl.EntryTransactionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+
+/**
+ * @author Pengcheng Xiao
+ *
+ * RESTful API for query account list and account details for an account
+ */
+@RestController
+@RequestMapping(value = "/accounts")
+public class AccountController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
+
+    @Autowired
+    IAccountService accountService;
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Account>> findAll(){
+        logger.info("performing find all accounts request...");
+        try {
+            List<Account> accountList = accountService.findAll();
+            return ResponseEntity.ok(accountList);
+        } catch (Exception e) {
+            logger.error("Error occurred while handling find all request", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve accounts", e);
+        }
+    }
+
+    @GetMapping (value = "/{id}")
+    public ResponseEntity<Account> findById(@PathVariable("id") Long id){
+        logger.info("performing find account by id request...");
+        try {
+            Account account = accountService.findById(id);
+            if (account == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+            }
+            return ResponseEntity.ok(account);
+        } catch (Exception e) {
+            logger.error("Error occurred while handling find by id request", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve account", e);
+        }
+    }
+}

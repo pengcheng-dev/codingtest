@@ -5,6 +5,11 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author Pengcheng Xiao
+ *
+ * AccountTag entity, not used
+ */
 @Data
 @Entity
 @Table (name = "TAccountTag")
