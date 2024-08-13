@@ -88,3 +88,32 @@ To run backend tests:
 cd codingtest
 ./mvn test
 ```
+
+## Architecture & Design
+
+### Entity Design
+
+This project uses a series of JPA entities to model the database schema for handling various types of `EntryTransaction` records. Below is a breakdown of the design decisions and relationships among entities:
+
+#### TEntryTransaction
+- **Purpose**: Represents transactions in the system, serving as the central entity around which the application is built.
+- **Relationships**:
+    - **ManyToOne with TAccount**: Each transaction is linked to a specific account, indicating the ownership or origin of the transaction.
+    - **Polymorphism with Entry types**: Utilizes inheritance to connect various entry types such as `BasicBankEntry`, `InvestmentEntry`, etc.
+
+#### Entry Types (Inheritance Strategy)
+- **Design Choice**: Used the `JOINED` strategy for inheritance to optimize performance and data normalization.
+- **Types**:
+    - `BasicBankEntry`: Represents basic banking transactions.
+    - `InvestmentEntry`: Caters to investments with specific attributes.
+- **Benefits**:
+    - **Flexibility**: Allows easy addition of new types.
+    - **Maintainability**: Changes to common fields need to be updated in one place only.
+
+### Data Integrity and Scalability
+- **Foreign Key Constraints**: Ensure data integrity through explicit constraints in the database schema.
+- **Indexes**: Utilized to improve query performance, especially important as the dataset grows.
+
+### Future Considerations
+- **Scalability**: The design supports scaling by allowing for easy sharding of the `TEntryTransaction` table based on `accountId` or other columns.
+- **Maintainability**: With clear separation of concerns and use of JPA repositories, the backend remains easy to modify and extend.
