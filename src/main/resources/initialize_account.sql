@@ -1,0 +1,2 @@
+insert into transaction.taccount(accountClass, accountId, accountType, code, name) values('A', '456', 'Business', 'XYZ', 'ABC');
+insert into transaction.taccount(accountClass, accountId, accountType, code, name) values('B', '456', 'Business', 'UTC', 'DEF');
