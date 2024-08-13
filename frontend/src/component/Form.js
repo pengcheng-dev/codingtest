@@ -4,6 +4,7 @@ import { Formik, Form, Field, ErrorMessage, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { format, parse } from 'date-fns'; // date-fns for date manipulation
 import EntryTransactionService from '../api/Service';
+import styles from '../Form.module.css';
 
 // Configuration for dynamic fields based on entry type
 // This part need to be changed synchonized with the back-end changes
@@ -172,23 +173,28 @@ const EntryTransactionForm = () => {
         >
 
             {formik => (
-                <Form>
+                <Form className={styles.verticalForm}>
                 <div key="entryTransactionPart">
-                    <label htmlFor="type">Type:</label>
-                    <Field name="type" type="text" />
-                    <ErrorMessage name="type" component="div" />
-
-                    <label htmlFor="amount">Amount:</label>
-                    <Field id="amount" name="amount" type="number" />
-                    <ErrorMessage name="amount" component="div" />
-
-                    <label htmlFor="transactionDate">Transaction Date:</label>
-                    <Field id="transactionDate" name="transactionDate" type="date" />
-                    <ErrorMessage name="transactionDate" component="div" />
-
-                    <label htmlFor="fundId">Fund ID:</label>
-                    <Field id="fundId" name="fundId" type="text" />
-                    <ErrorMessage name="fundId" component="div" />
+                    <div>
+                        <label htmlFor="type">Type:</label>
+                        <Field name="type" type="text" />
+                        <ErrorMessage name="type" component="div" />
+                    </div>
+                    <div>
+                        <label htmlFor="amount">Amount:</label>
+                        <Field id="amount" name="amount" type="number" />
+                        <ErrorMessage name="amount" component="div" />
+                    </div>
+                    <div>
+                        <label htmlFor="transactionDate">Transaction Date:</label>
+                        <Field id="transactionDate" name="transactionDate" type="date" />
+                        <ErrorMessage name="transactionDate" component="div" />
+                    </div>
+                    <div>
+                        <label htmlFor="fundId">Fund ID:</label>
+                        <Field id="fundId" name="fundId" type="text" />
+                        <ErrorMessage name="fundId" component="div" />
+                    </div>
                 </div>
 
                 <div key="accountPart">
@@ -206,67 +212,73 @@ const EntryTransactionForm = () => {
                         <ErrorMessage name="accountIncrementalId" component="div" />
                     </div>
 
-                    <label htmlFor="accountId">  Account ID: {accountDetails.accountID}  </label>
+                    <div><label htmlFor="accountId">  Account ID: {accountDetails.accountID}  </label></div>
 
-                    <label htmlFor="accountCode">  Account Code: {accountDetails.code}  </label>
+                    <div><label htmlFor="accountCode">  Account Code: {accountDetails.code}  </label></div>
 
-                    <label htmlFor="accountName">  Account Name: {accountDetails.name}  </label>
+                    <div><label htmlFor="accountName">  Account Name: {accountDetails.name}  </label></div>
 
-                    <label htmlFor="accountClass">  Account Class:  {accountDetails.accountClass}  </label>
+                    <div><label htmlFor="accountClass">  Account Class:  {accountDetails.accountClass}  </label></div>
 
-                    <label htmlFor="accountType">  Account Type:  {accountDetails.accountType}  </label>
+                    <div><label htmlFor="accountType">  Account Type:  {accountDetails.accountType}  </label></div>
 
-                    <label htmlFor="parentId">  Parent ID:  {accountDetails.pid}  </label>
+                    <div><label htmlFor="parentId">  Parent ID:  {accountDetails.pid}  </label></div>
                 </div>
                 
-                <div>
-                    <label htmlFor="entryId">Entry ID (disabled):</label>
-                    <Field id="entryId" name="entryId" type="number" disabled={true} />
-                    <ErrorMessage name="entryId" component="div" />
+                <div key="entryPart">
+                    <div>
+                        <label htmlFor="entryId">Entry ID (disabled):</label>
+                        <Field id="entryId" name="entryId" type="number" disabled={true} />
+                        <ErrorMessage name="entryId" component="div" />
+                    </div>
+                    <div>
+                        <label htmlFor="entryAmount">Entry Amount:</label>
+                        <Field id="entryAmount" name="entryAmount" type="number" />
+                        <ErrorMessage name="entryAmount" component="div" />
+                    </div>
+                    <div>
+                        <label htmlFor="entryGstAmount">Entry GST Amount:</label>
+                        <Field id="entryGstAmount" name="entryGstAmount" type="number" />
+                        <ErrorMessage name="entryGstAmount" component="div" />
+                    </div>
+                    <div>
+                        <label htmlFor="entryType">Entry Type:</label>
+                        <Field as="select" name="entryType" onChange={e => {
 
-                    <label htmlFor="entryAmount">Entry Amount:</label>
-                    <Field id="entryAmount" name="entryAmount" type="number" />
-                    <ErrorMessage name="entryAmount" component="div" />
+                            const newType = e.target.value;
+                            setEntryType(newType);
 
-                    <label htmlFor="entryGstAmount">Entry GST Amount:</label>
-                    <Field id="entryGstAmount" name="entryGstAmount" type="number" />
-                    <ErrorMessage name="entryGstAmount" component="div" />
+                            // Reset the dynamic fields based on the new type selected
+                            const updatedNameValueMap = {};
+                            Object.keys(fieldConfigurations[newType] || {}).forEach(key => {
+                                updatedNameValueMap[key] = ''; // Reset to empty string or appropriate default
+                            });
 
-                    <Field as="select" name="entryType" onChange={e => {
+                            formik.setValues({
+                                ...formik.values,
+                                entryType: newType,
+                                nameValueMap: updatedNameValueMap
+                            });
 
-                        const newType = e.target.value;
-                        setEntryType(newType);
+                        }}>
+                            <option value="">Select Type</option>
+                            {Object.keys(fieldConfigurations).map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </Field>
+                        <ErrorMessage name="entryType" component="div" />
 
-                        // Reset the dynamic fields based on the new type selected
-                        const updatedNameValueMap = {};
-                        Object.keys(fieldConfigurations[newType] || {}).forEach(key => {
-                            updatedNameValueMap[key] = ''; // Reset to empty string or appropriate default
-                        });
-
-                        formik.setValues({
-                            ...formik.values,
-                            entryType: newType,
-                            nameValueMap: updatedNameValueMap
-                        });
-
-                    }}>
-                        <option value="">Select Type</option>
-                        {Object.keys(fieldConfigurations).map(type => (
-                            <option key={type} value={type}>{type}</option>
+                        {entryType && Object.entries(fieldConfigurations[entryType] || {}).map(([key, config]) => (
+                            <div key={key}>
+                                <label htmlFor={`nameValueMap.${key}`}>{config.label}</label>
+                                <Field name={`nameValueMap.${key}`} type={config.type === "number" ? "number" : "text"} />
+                                <ErrorMessage name={`nameValueMap.${key}`} component="div" />
+                            </div>
                         ))}
-                    </Field>
-                    <ErrorMessage name="entryType" component="div" />
-
-                    {entryType && Object.entries(fieldConfigurations[entryType] || {}).map(([key, config]) => (
-                        <div key={key}>
-                            <label htmlFor={`nameValueMap.${key}`}>{config.label}</label>
-                            <Field name={`nameValueMap.${key}`} type={config.type === "number" ? "number" : "text"} />
-                            <ErrorMessage name={`nameValueMap.${key}`} component="div" />
-                        </div>
-                    ))}
+                    </div>
                 </div>
                 
-                <button type="submit">{id ? 'Update' : 'Create'}</button>
+                <button type="submit" className={styles.button}>{id ? 'Update' : 'Create'}</button>
             </Form>
             )}
 

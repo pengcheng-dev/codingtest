@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * @author Pengcheng Xiao
  *
@@ -21,7 +19,7 @@ public interface EntryTransactionRepository extends JpaRepository<EntryTransacti
     /**
      * customized query for selecting common fields of parent entry entity only
      * @param pageable
-     * @return
+     * @return Entry transaction page
      */
     @Query("SELECT et FROM EntryTransaction et")
     @EntityGraph(value = "EntryTransaction.accountAndEntryBrief", type = EntityGraph.EntityGraphType.FETCH)

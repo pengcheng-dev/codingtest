@@ -2,9 +2,7 @@ package com.bgl.backend.service.impl;
 
 import com.bgl.backend.dao.EntryTransactionRepository;
 import com.bgl.backend.exception.BusinessException;
-import com.bgl.backend.model.Account;
 import com.bgl.backend.model.EntryTransaction;
-import com.bgl.backend.service.IAccountService;
 import com.bgl.backend.service.IEntryTransactionService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -34,8 +32,8 @@ public class EntryTransactionService implements IEntryTransactionService {
     /**
      * save an entry transaction, all fields must be valid
      * @param entryTransaction
-     * @return
-     * @throws Exception
+     * @return EntryTransaction
+     * @throws BusinessException
      */
     @Transactional
     @Override
@@ -54,8 +52,8 @@ public class EntryTransactionService implements IEntryTransactionService {
      * and new subtype entry will be created and associated with the entry transaction
      * @param id
      * @param entryTransaction
-     * @return
-     * @throws Exception
+     * @return EntryTransaction
+     * @throws BusinessException
      */
     @Override
     @Transactional
@@ -89,7 +87,7 @@ public class EntryTransactionService implements IEntryTransactionService {
     /**
      * business logic of deleting an entry transaction, spring transaction involved
      * @param id
-     * @throws Exception
+     * @throws BusinessException
      */
     @Override
     @Transactional
@@ -112,7 +110,7 @@ public class EntryTransactionService implements IEntryTransactionService {
     /**
      * business logic of query an entry transaction, validate id
      * @param id
-     * @return
+     * @return EntryTransaction
      */
     @Override
     public EntryTransaction findDetailById(Long id) {
@@ -130,7 +128,7 @@ public class EntryTransactionService implements IEntryTransactionService {
     /**
      * business logic of query a page of entry transaction
      * @param pageable
-     * @return
+     * @return Page of EntryTransaction
      */
     @Override
     public Page<EntryTransaction> findAllBriefs(Pageable pageable) {
@@ -145,8 +143,8 @@ public class EntryTransactionService implements IEntryTransactionService {
     /**
      * a common validation method to validate all fields stand to the design
      * @param entryTransaction
-     * @param forSave
-     * @throws Exception
+     * @param forSave or for update
+     * @throws BusinessException
      */
     private void validateTransaction(EntryTransaction entryTransaction, boolean forSave) throws Exception {
         // Implement business logic validations

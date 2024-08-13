@@ -26,7 +26,7 @@ public class AccountService implements IAccountService {
 
     /**
      * query all accounts
-     * @return
+     * @return Account list
      */
     @Override
     public List<Account> findAll() {
@@ -41,7 +41,7 @@ public class AccountService implements IAccountService {
     /**
      * query an account by ID
      * @param id
-     * @return
+     * @return Account
      */
     @Override
     public Account findById(Long id) {

@@ -38,7 +38,7 @@ public class EntryTransactionController {
     /**
      * RESTful API for query a dedicated entry transaction
      * @param id
-     * @return
+     * @return EntryTransactionDetail DTO
      */
     @GetMapping (value = "/{id}")
     public ResponseEntity<EntryTransactionDetail> findById(@PathVariable("id") Long id){
@@ -59,7 +59,7 @@ public class EntryTransactionController {
     /**
      * RESTful API for query a page of entry transaction
      * @param pageable
-     * @return
+     * @return Page of EntryTransactionBrief
      */
     @GetMapping (produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Page<EntryTransactionBrief>> findAll(@PageableDefault(size = 10) Pageable pageable){
@@ -78,7 +78,7 @@ public class EntryTransactionController {
      * RESTful API for create an entry transaction
      * receive DTO from client and convert it to entity before calling service
      * @param entryTransactionDetail
-     * @return
+     * @return EntryTransactionDetail DTO
      */
     @PostMapping
     public ResponseEntity<EntryTransactionDetail> create(@Validated({Create.class, Default.class}) @RequestBody EntryTransactionDetail entryTransactionDetail){
@@ -99,7 +99,7 @@ public class EntryTransactionController {
      * receive DTO from client and convert it to entity before calling service
      * @param entryTransactionDetail
      * @param id
-     * @return
+     * @return EntryTransactionDetail DTO
      */
     @PutMapping (value = "/{id}")
     public ResponseEntity<EntryTransactionDetail> update(@Validated({Update.class, Default.class}) @RequestBody EntryTransactionDetail entryTransactionDetail, @PathVariable Long id){
@@ -118,7 +118,7 @@ public class EntryTransactionController {
     /**
      * RESTful API for delete an entry transaction
      * @param id
-     * @return
+     * @return HTTP_STATUS
      */
     @DeleteMapping (value = "/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id){

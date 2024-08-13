@@ -2,7 +2,6 @@ package com.bgl.backend.controller;
 
 import com.bgl.backend.model.Account;
 import com.bgl.backend.service.IAccountService;
-import com.bgl.backend.service.impl.EntryTransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

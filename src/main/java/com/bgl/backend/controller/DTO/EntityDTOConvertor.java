@@ -10,7 +10,6 @@ import java.util.Map;
 
 /**
  * @author Pengcheng Xiao
- *
  * a helper convert from entity to brief DTO for list display, unify time formatter as well,
  * convert entity to detail DTO for updating, and help controller converting DTO to entity
  */
@@ -24,7 +23,7 @@ public class EntityDTOConvertor {
     /**
      * convert detail DTO received form client to entity
      * @param detailDTO
-     * @return
+     * @return EntryTransaction
      */
     public static EntryTransaction mapToEntity(EntryTransactionDetail detailDTO) {
 
@@ -93,7 +92,7 @@ public class EntityDTOConvertor {
     /**
      * convert entity to detail DTO for updating or detail view
      * @param entryTransaction
-     * @return
+     * @return EntryTransaction DTO with additional fields of subtype
      */
     public static EntryTransactionDetail mapToDetailDTO(EntryTransaction entryTransaction) {
         // Implement the mapping logic from EntryTransaction entity to EntryTransactionDetail DTO
@@ -146,7 +145,7 @@ public class EntityDTOConvertor {
     /**
      * convert entity list to DTO list for list display, only display common fields
      * @param entryTransaction
-     * @return
+     * @return Entry transaction DTO with common fields
      */
     public static EntryTransactionBrief mapToBriefDTO(EntryTransaction entryTransaction) {
         // Implement the mapping logic from EntryTransaction entity to EntryTransactionDetail DTO

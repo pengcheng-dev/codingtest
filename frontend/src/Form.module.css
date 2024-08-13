@@ -1,0 +1,12 @@
+.verticalForm {
+    display: flex;
+    flex-direction: column;
+}
+
+.verticalForm div {
+    margin-bottom: 10px;  /* Adjust spacing between form elements */
+}
+
+.button {
+    width: 200px; /* Set the width to your desired size */
+}

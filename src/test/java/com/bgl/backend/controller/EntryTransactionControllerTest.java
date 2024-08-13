@@ -1,7 +1,6 @@
 package com.bgl.backend.controller;
 
 import com.bgl.backend.controller.DTO.EntityDTOConvertor;
-import com.bgl.backend.controller.DTO.EntryTransactionBrief;
 import com.bgl.backend.controller.DTO.EntryTransactionDetail;
 import com.bgl.backend.model.Account;
 import com.bgl.backend.model.BasicBankEntry;
@@ -10,7 +9,6 @@ import com.bgl.backend.service.impl.EntryTransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,10 +23,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
