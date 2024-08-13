@@ -59,6 +59,10 @@ Backup and remove the old table:
 DROP TABLE TAccountTags_old;
 ```
 
+### 8. Impact to the Codebase
+Any classes related to `TAccountTags` need to be changed, from Entity class to Controller, as well as frontend changes.
+Deleting `year` field of `AccountTags` will make compile and unit tests fail.
+
 ## Considerations
 
 - **Downtime**: This approach aims to minimize downtime by performing most operations while the system is live and only requiring a brief switch period.
