@@ -111,9 +111,8 @@ This project uses a series of JPA entities to model the database schema for hand
     - **Maintainability**: Changes to common fields need to be updated in one place only.
 
 ### Data Integrity and Scalability
-- **Foreign Key Constraints**: Ensure data integrity through explicit constraints in the database schema.
-- **Indexes**: Utilized to improve query performance, especially important as the dataset grows.
+- **Foreign Key Constraints**: Ensure data integrity through explicit constraints in the database schema, and subtype entries will be deleted as an orphan.
+- **Indexes**: TODO: Create indexes to improve query performance, especially important as the dataset grows.
 
 ### Future Considerations
 - **Scalability**: The design supports scaling by allowing for easy sharding of the `TEntryTransaction` table based on `accountId` or other columns.
-- **Maintainability**: With clear separation of concerns and use of JPA repositories, the backend remains easy to modify and extend.
