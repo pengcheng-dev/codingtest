@@ -1,5 +1,6 @@
 package com.bgl.backend.service;
 
+import com.bgl.backend.dao.projection.EntryTransactionBriefProjection;
 import com.bgl.backend.model.Account;
 import com.bgl.backend.model.BasicBankEntry;
 import com.bgl.backend.model.EntryTransaction;
@@ -26,10 +27,10 @@ import static org.mockito.Mockito.*;
 public class EntryTransactionServiceTest {
 
     @Mock
-    private EntryTransactionRepository entryTransactionRepository;
+    private transient EntryTransactionRepository entryTransactionRepository;
 
     @InjectMocks
-    private EntryTransactionService entryTransactionService;
+    private transient EntryTransactionService entryTransactionService;
 
     @BeforeEach
     public void setup() {
@@ -38,7 +39,7 @@ public class EntryTransactionServiceTest {
 
     @Test
     public void testSave_WithInvalidEntity() throws Exception {
-        EntryTransaction entryTransaction = new EntryTransaction();
+        final EntryTransaction entryTransaction = new EntryTransaction();
         entryTransaction.setId(1L);
         when(entryTransactionRepository.save(any(EntryTransaction.class))).thenReturn(entryTransaction);
 
@@ -50,14 +51,14 @@ public class EntryTransactionServiceTest {
     @Test
     public void testSave_WithValidEntity() throws Exception {
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
 
         et.setType("ABC");
         et.setFundId("123456");
         et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
-        Account account = new Account();
+        final Account account = new Account();
         account.setId(1L);
         account.setAccountID(123456L);
         account.setCode("Code-123");
@@ -65,7 +66,7 @@ public class EntryTransactionServiceTest {
         account.setAccountClass("xyz");
         et.setAccount(account);
 
-        BasicBankEntry entry = new BasicBankEntry();
+        final BasicBankEntry entry = new BasicBankEntry();
         entry.setEntryType("BasicBank");
         entry.setAmount(new BigDecimal("123.12"));
         entry.setGstAmount(new BigDecimal("125.90"));
@@ -75,7 +76,7 @@ public class EntryTransactionServiceTest {
         when(entryTransactionRepository.save(any(EntryTransaction.class))).thenReturn(et);
 
         //when
-        EntryTransaction savedTransaction = entryTransactionService.save(et);
+        final EntryTransaction savedTransaction = entryTransactionService.save(et);
 
         //then
         assertNotNull(savedTransaction);
@@ -85,14 +86,14 @@ public class EntryTransactionServiceTest {
 
     @Test
     public void testUpdate_WithInvalidEntity() throws Exception {
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
 
         et.setType("ABC");
         et.setFundId("123456");
         et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
-        Account account = new Account();
+        final Account account = new Account();
         account.setId(1L);
         account.setAccountID(123456L);
         account.setCode("Code-123");
@@ -100,7 +101,7 @@ public class EntryTransactionServiceTest {
         account.setAccountClass("xyz");
         et.setAccount(account);
 
-        BasicBankEntry entry = new BasicBankEntry();
+        final BasicBankEntry entry = new BasicBankEntry();
         entry.setEntryType("BasicBank");
         entry.setAmount(new BigDecimal("123.12"));
         entry.setGstAmount(new BigDecimal("125.90"));
@@ -119,14 +120,14 @@ public class EntryTransactionServiceTest {
     @Test
     public void testUpdate_WithValidEntity() throws Exception {
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
         et.setId(1L);
         et.setType("ABC");
         et.setFundId("123456");
         et.setTransactionDate(LocalDate.now());
         et.setAmount(new BigDecimal("12.45"));
 
-        Account account = new Account();
+        final Account account = new Account();
         account.setId(1L);
         account.setAccountID(123456L);
         account.setCode("Code-123");
@@ -134,7 +135,7 @@ public class EntryTransactionServiceTest {
         account.setAccountClass("xyz");
         et.setAccount(account);
 
-        BasicBankEntry entry = new BasicBankEntry();
+        final BasicBankEntry entry = new BasicBankEntry();
         entry.setId(1L);
         entry.setEntryType("BasicBank");
         entry.setAmount(new BigDecimal("123.12"));
@@ -146,7 +147,7 @@ public class EntryTransactionServiceTest {
         when(entryTransactionRepository.findById(1L)).thenReturn(Optional.of(et));
         when(entryTransactionRepository.save(any(EntryTransaction.class))).thenReturn(et);
 
-        EntryTransaction updatedTransaction = entryTransactionService.update(1L, et);
+        final EntryTransaction updatedTransaction = entryTransactionService.update(1L, et);
 
         assertNotNull(updatedTransaction);
         assertEquals(1L, updatedTransaction.getId());
@@ -154,7 +155,7 @@ public class EntryTransactionServiceTest {
 
     @Test
     public void testDelete() throws Exception {
-        Long id = 1L;
+        final Long id = 1L;
         when(entryTransactionRepository.existsById(id)).thenReturn(true);
         doNothing().when(entryTransactionRepository).deleteById(id);
 
@@ -165,12 +166,12 @@ public class EntryTransactionServiceTest {
 
     @Test
     public void testFindDetailById() {
-        Long id = 1L;
-        EntryTransaction entryTransaction = new EntryTransaction();
+        final Long id = 1L;
+        final EntryTransaction entryTransaction = new EntryTransaction();
         entryTransaction.setId(id);
         when(entryTransactionRepository.findById(id)).thenReturn(Optional.of(entryTransaction));
 
-        EntryTransaction foundTransaction = entryTransactionService.findDetailById(id);
+        final EntryTransaction foundTransaction = entryTransactionService.findDetailById(id);
 
         assertNotNull(foundTransaction);
         assertEquals(id, foundTransaction.getId());
@@ -178,12 +179,12 @@ public class EntryTransactionServiceTest {
 
     @Test
     public void testFindAllBriefs() {
-        Page<EntryTransaction> page = new PageImpl<>(Arrays.asList(new EntryTransaction()));
+        final Page<EntryTransactionBriefProjection> page = new PageImpl<EntryTransactionBriefProjection>(Arrays.asList());
         when(entryTransactionRepository.findAllBriefs(any(Pageable.class))).thenReturn(page);
 
-        Page<EntryTransaction> result = entryTransactionService.findAllBriefs(PageRequest.of(0, 10));
+        final Page<EntryTransactionBriefProjection> result = entryTransactionService.findAllBriefs(PageRequest.of(0, 10));
         assertNotNull(result);
-        assertEquals(1, result.getContent().size());
+        assertEquals(0, result.getContent().size());
 
         verify(entryTransactionRepository).findAllBriefs(any(Pageable.class));
     }

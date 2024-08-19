@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @Data
 @Validated
-public class EntryTransactionDetail {
+public class EntryTransactionDetailDTO {
 
     @Null(groups = Create.class)
     private Long id;

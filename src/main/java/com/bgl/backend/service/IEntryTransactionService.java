@@ -1,5 +1,6 @@
 package com.bgl.backend.service;
 
+import com.bgl.backend.dao.projection.EntryTransactionBriefProjection;
 import com.bgl.backend.model.EntryTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Component;
 @Component
 public interface IEntryTransactionService {
 
-    EntryTransaction save(EntryTransaction entryTransaction) throws Exception;
-    EntryTransaction update(Long id, EntryTransaction entryTransaction) throws Exception;
-    void delete(Long id) throws Exception;
+    EntryTransaction save(final EntryTransaction entryTransaction);
+    EntryTransaction update(final Long id, final EntryTransaction entryTransaction);
+    void delete(final Long id);
 
-    EntryTransaction findDetailById(Long id);
-    Page<EntryTransaction> findAllBriefs(Pageable pageable);
+    EntryTransaction findDetailById(final Long id);
+    Page<EntryTransactionBriefProjection> findAllBriefs(final Pageable pageable);
 }

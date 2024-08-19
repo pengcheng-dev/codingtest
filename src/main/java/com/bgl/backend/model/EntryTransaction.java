@@ -15,19 +15,6 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table (name = "TEntryTransaction")
-
-/**
- * select common fields of entry entity only for list display
- * do not fetch additional fields specified for each sub entry entity
- */
-@NamedEntityGraph(
-        name = "EntryTransaction.accountAndEntryBrief",
-        attributeNodes = {
-                @NamedAttributeNode("account"),
-                @NamedAttributeNode("entry")
-        }
-)
-
 public class EntryTransaction implements Cloneable{
 
     @Id

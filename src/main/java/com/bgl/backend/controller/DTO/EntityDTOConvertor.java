@@ -1,5 +1,6 @@
 package com.bgl.backend.controller.DTO;
 
+import com.bgl.backend.dao.projection.EntryTransactionBriefProjection;
 import com.bgl.backend.model.*;
 
 import java.math.BigDecimal;
@@ -25,7 +26,7 @@ public class EntityDTOConvertor {
      * @param detailDTO
      * @return EntryTransaction
      */
-    public static EntryTransaction mapToEntity(EntryTransactionDetail detailDTO) {
+    public static EntryTransaction mapDetailDTOToEntity(EntryTransactionDetailDTO detailDTO) {
 
         EntryTransaction et = new EntryTransaction();
         et.setId(detailDTO.getId());
@@ -94,10 +95,10 @@ public class EntityDTOConvertor {
      * @param entryTransaction
      * @return EntryTransaction DTO with additional fields of subtype
      */
-    public static EntryTransactionDetail mapToDetailDTO(EntryTransaction entryTransaction) {
+    public static EntryTransactionDetailDTO mapEntityToDetailDTO(EntryTransaction entryTransaction) {
         // Implement the mapping logic from EntryTransaction entity to EntryTransactionDetail DTO
 
-        EntryTransactionDetail detailDTO = new EntryTransactionDetail();
+        EntryTransactionDetailDTO detailDTO = new EntryTransactionDetailDTO();
         detailDTO.setId(entryTransaction.getId());
         detailDTO.setType(entryTransaction.getType());
         detailDTO.setFundId(entryTransaction.getFundId());
@@ -144,32 +145,34 @@ public class EntityDTOConvertor {
 
     /**
      * convert entity list to DTO list for list display, only display common fields
-     * @param entryTransaction
+     * @param entryTransactionProjection JPA Projection to retrieve fields specified
      * @return Entry transaction DTO with common fields
      */
-    public static EntryTransactionBrief mapToBriefDTO(EntryTransaction entryTransaction) {
+    public static EntryTransactionBriefDTO mapEntityProjectionToBriefDTO(EntryTransactionBriefProjection entryTransactionProjection) {
         // Implement the mapping logic from EntryTransaction entity to EntryTransactionDetail DTO
 
-        EntryTransactionBrief briefDTO = new EntryTransactionBrief();
-        briefDTO.setId(entryTransaction.getId());
-        briefDTO.setType(entryTransaction.getType());
-        briefDTO.setFundId(entryTransaction.getFundId());
-        briefDTO.setAmount(entryTransaction.getAmount());
-        briefDTO.setTransactionDate(entryTransaction.getTransactionDate().format(DATE_FORMATTER));
-        briefDTO.setDateCreated(entryTransaction.getDateCreated().toLocalDateTime().format(DATE_TIME_FORMATTER));
-        briefDTO.setLastUpdated(entryTransaction.getLastUpdated().toLocalDateTime().format(DATE_TIME_FORMATTER));
+        EntryTransactionBriefDTO briefDTO = new EntryTransactionBriefDTO();
+        briefDTO.setId(entryTransactionProjection.getId());
+        briefDTO.setType(entryTransactionProjection.getType());
+        briefDTO.setFundId(entryTransactionProjection.getFundId());
+        briefDTO.setAmount(entryTransactionProjection.getAmount());
+        briefDTO.setTransactionDate(entryTransactionProjection.getTransactionDate().format(DATE_FORMATTER));
+        briefDTO.setDateCreated(entryTransactionProjection.getDateCreated().toLocalDateTime().format(DATE_TIME_FORMATTER));
+        briefDTO.setLastUpdated(entryTransactionProjection.getLastUpdated().toLocalDateTime().format(DATE_TIME_FORMATTER));
 
-        briefDTO.setAccountIncrementalId(entryTransaction.getAccount().getId());
-        briefDTO.setAccountId(entryTransaction.getAccount().getAccountID());
-        briefDTO.setAccountCode(entryTransaction.getAccount().getCode());
-        briefDTO.setAccountType(entryTransaction.getAccount().getAccountType());
-        briefDTO.setAccountName(entryTransaction.getAccount().getName());
-        briefDTO.setAccountClass(entryTransaction.getAccount().getAccountClass());
 
-        briefDTO.setEntryId(entryTransaction.getEntry().getId());
-        briefDTO.setEntryType(entryTransaction.getEntry().getEntryType());
-        briefDTO.setEntryAmount(entryTransaction.getEntry().getAmount());
-        briefDTO.setEntryGstAmount(entryTransaction.getEntry().getGstAmount());
+        briefDTO.setEntryId(entryTransactionProjection.getEntryId());
+        briefDTO.setEntryType(entryTransactionProjection.getEntryType());
+        briefDTO.setEntryAmount(entryTransactionProjection.getEntryAmount());
+        briefDTO.setEntryGstAmount(entryTransactionProjection.getEntryGstAmount());
+
+        briefDTO.setAccountIncrementalId(entryTransactionProjection.getAccountIncrementalId());
+        briefDTO.setAccountId(entryTransactionProjection.getAccountID());
+        briefDTO.setAccountCode(entryTransactionProjection.getAccountCode());
+        briefDTO.setAccountType(entryTransactionProjection.getAccountType());
+        briefDTO.setAccountName(entryTransactionProjection.getAccountName());
+        briefDTO.setAccountClass(entryTransactionProjection.getAccountClass());
+
 
         return briefDTO;
     }

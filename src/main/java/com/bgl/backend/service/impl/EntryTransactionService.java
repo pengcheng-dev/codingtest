@@ -1,15 +1,15 @@
 package com.bgl.backend.service.impl;
 
 import com.bgl.backend.dao.EntryTransactionRepository;
-import com.bgl.backend.exception.BusinessException;
+import com.bgl.backend.dao.projection.EntryTransactionBriefProjection;
+import com.bgl.backend.common.exception.SystemException;
 import com.bgl.backend.model.EntryTransaction;
 import com.bgl.backend.service.IEntryTransactionService;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -24,27 +24,19 @@ import java.util.Optional;
 @Component
 public class EntryTransactionService implements IEntryTransactionService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EntryTransactionService.class);
-
     @Autowired
-    private EntryTransactionRepository entryTransactionRepository;
+    private transient EntryTransactionRepository entryTransactionRepository;
 
     /**
      * save an entry transaction, all fields must be valid
      * @param entryTransaction
      * @return EntryTransaction
-     * @throws BusinessException
      */
     @Transactional
     @Override
-    public EntryTransaction save(EntryTransaction entryTransaction) throws Exception {
+    public EntryTransaction save(final EntryTransaction entryTransaction) {
         validateTransaction(entryTransaction, true);
-        try {
-            return entryTransactionRepository.save(entryTransaction);
-        } catch (Exception e) {
-            logger.error("Error occurred while performing saving entry transaction", e);
-            throw new BusinessException("Failed to save entry transaction", e);
-        }
+        return entryTransactionRepository.save(entryTransaction);
     }
 
     /**
@@ -53,57 +45,49 @@ public class EntryTransactionService implements IEntryTransactionService {
      * @param id
      * @param entryTransaction
      * @return EntryTransaction
-     * @throws BusinessException
+     * @throws SystemException
      */
     @Override
     @Transactional
-    public EntryTransaction update(Long id, EntryTransaction entryTransaction) throws Exception {
+    public EntryTransaction update(final Long id, final EntryTransaction entryTransaction) {
         validateTransaction(entryTransaction, false);
-        try {
-            Optional<EntryTransaction> existingTransaction = entryTransactionRepository.findById(id);
-            if (existingTransaction.isPresent()) {
-                EntryTransaction transactionToUpdate = existingTransaction.get();
 
-                // Update fields as needed
-                transactionToUpdate.setAmount(entryTransaction.getAmount());
-                transactionToUpdate.setType(entryTransaction.getType());
-                transactionToUpdate.setTransactionDate(entryTransaction.getTransactionDate());
-                transactionToUpdate.setAmount(entryTransaction.getAmount());
-                transactionToUpdate.setFundId(entryTransaction.getFundId());
 
-                transactionToUpdate.setEntry(entryTransaction.getEntry());
-                transactionToUpdate.setAccount(entryTransaction.getAccount());
+        final Optional<EntryTransaction> existingTransaction = entryTransactionRepository.findById(id);
 
-                return entryTransactionRepository.save(transactionToUpdate);
-            } else {
-                throw new BusinessException("EntryTransaction not found");
-            }
-        } catch (Exception e) {
-            logger.error("Error occurred while performing updating entry transaction", e);
-            throw new BusinessException("Failed to update entry transaction", e);
+        if (existingTransaction.isPresent()) {
+            final EntryTransaction transactionToUpdate = existingTransaction.get();
+
+            // Update fields as needed
+            transactionToUpdate.setAmount(entryTransaction.getAmount());
+            transactionToUpdate.setType(entryTransaction.getType());
+            transactionToUpdate.setTransactionDate(entryTransaction.getTransactionDate());
+            transactionToUpdate.setAmount(entryTransaction.getAmount());
+            transactionToUpdate.setFundId(entryTransaction.getFundId());
+
+            transactionToUpdate.setEntry(entryTransaction.getEntry());
+            transactionToUpdate.setAccount(entryTransaction.getAccount());
+
+            return entryTransactionRepository.save(transactionToUpdate);
+        } else {
+            throw new SystemException("EntryTransaction not found", HttpStatus.NOT_FOUND.value());
         }
     }
 
     /**
      * business logic of deleting an entry transaction, spring transaction involved
-     * @param id
-     * @throws BusinessException
+     * @param id entry transaction id
      */
     @Override
     @Transactional
-    public void delete(Long id) throws Exception {
+    public void delete(final Long id) {
         if((null == id) || (id < 0)){
-            throw new RuntimeException("Invalid Id");
+            throw new IllegalArgumentException("Invalid Id, must be a positive Id");
         }
-        try {
-            if (entryTransactionRepository.existsById(id)) {
-                entryTransactionRepository.deleteById(id);
-            } else {
-                throw new BusinessException("EntryTransaction not found");
-            }
-        } catch (Exception e) {
-            logger.error("Error occurred while performing deleting entry transaction", e);
-            throw new BusinessException("Failed to delete entry transaction", e);
+        if (entryTransactionRepository.existsById(id)) {
+            entryTransactionRepository.deleteById(id);
+        } else {
+            throw new SystemException("EntryTransaction not found", HttpStatus.NOT_FOUND.value());
         }
     }
 
@@ -113,16 +97,11 @@ public class EntryTransactionService implements IEntryTransactionService {
      * @return EntryTransaction
      */
     @Override
-    public EntryTransaction findDetailById(Long id) {
+    public EntryTransaction findDetailById(final Long id) {
         if((null == id) || (id < 0)){
-            throw new BusinessException("Invalid Id");
+            throw new IllegalArgumentException("Invalid Id, must be a positive Id");
         }
-        try {
-            return entryTransactionRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            logger.error("Error occurred while performing finding an entry transaction", e);
-            throw new BusinessException("Failed to retrieve entry transaction details", e);
-        }
+        return entryTransactionRepository.findById(id).orElse(null);
     }
 
     /**
@@ -131,51 +110,51 @@ public class EntryTransactionService implements IEntryTransactionService {
      * @return Page of EntryTransaction
      */
     @Override
-    public Page<EntryTransaction> findAllBriefs(Pageable pageable) {
-        try {
-            return entryTransactionRepository.findAllBriefs(pageable);
-        } catch (Exception e) {
-            logger.error("Error occurred while performing finding entry transactions", e);
-            throw new BusinessException("Failed to retrieve entry transactions", e);
+    public Page<EntryTransactionBriefProjection> findAllBriefs(final Pageable pageable) {
+        if(pageable == null || pageable.getPageSize() < 1 || pageable.getPageNumber() < 0) {
+            throw new IllegalArgumentException("Pageable cannot be null and page size must be positive");
         }
+        return entryTransactionRepository.findAllBriefs(pageable);
     }
 
     /**
      * a common validation method to validate all fields stand to the design
      * @param entryTransaction
      * @param forSave or for update
-     * @throws BusinessException
      */
-    private void validateTransaction(EntryTransaction entryTransaction, boolean forSave) throws Exception {
+    private void validateTransaction(final EntryTransaction entryTransaction, final boolean forSave) {
         // Implement business logic validations
+        if(entryTransaction == null){
+            throw new IllegalArgumentException("Entry Transaction entity cannot be null");
+        }
         if (entryTransaction.getAmount() == null || entryTransaction.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException("Amount must be positive");
+            throw new IllegalArgumentException("Amount must be positive");
         }
         if (entryTransaction.getType() == null || entryTransaction.getType().isEmpty()) {
-            throw new BusinessException("Transaction type cannot be null or empty");
+            throw new IllegalArgumentException("Transaction type cannot be null or empty");
         }
         if (entryTransaction.getFundId() == null || entryTransaction.getFundId().isEmpty()) {
-            throw new BusinessException("Transaction fundId cannot be null or empty");
+            throw new IllegalArgumentException("Transaction fundId cannot be null or empty");
         }
         if (entryTransaction.getTransactionDate() == null) {
-            throw new BusinessException("Transaction date cannot be null");
+            throw new IllegalArgumentException("Transaction date cannot be null");
         }
         if (entryTransaction.getEntry() == null) {
-            throw new BusinessException("Entry cannot be null");
+            throw new IllegalArgumentException("Entry cannot be null");
         }
         if (entryTransaction.getAccount() == null) {
-            throw new BusinessException("Account cannot be null");
+            throw new IllegalArgumentException("Account cannot be null");
         }
         if (entryTransaction.getAccount().getId() == null) {
-            throw new BusinessException("Account Id cannot be null");
+            throw new IllegalArgumentException("Account Id cannot be null");
         }
         if(forSave){
             if (entryTransaction.getEntry().getId() != null) {
-                throw new BusinessException("Entry Id must be null");
+                throw new IllegalArgumentException("Entry Id must be null");
             }
         }else{
             if (entryTransaction.getEntry().getId() == null) {
-                throw new BusinessException("Entry Id cannot be null");
+                throw new IllegalArgumentException("Entry Id cannot be null");
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.bgl.backend.controller;
 
+import com.bgl.backend.common.exception.SystemException;
+import com.bgl.backend.common.logging.LoggerWrapper;
 import com.bgl.backend.model.Account;
 import com.bgl.backend.service.IAccountService;
 import org.slf4j.Logger;
@@ -25,35 +27,35 @@ import java.util.List;
 @RequestMapping(value = "/accounts")
 public class AccountController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
 
     @Autowired
-    IAccountService accountService;
+    private transient LoggerWrapper logger;
+
+    @Autowired
+    private transient IAccountService accountService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Account>> findAll(){
-        logger.info("performing find all accounts request...");
         try {
-            List<Account> accountList = accountService.findAll();
+            final List<Account> accountList = accountService.findAll();
             return ResponseEntity.ok(accountList);
-        } catch (Exception e) {
-            logger.error("Error occurred while handling find all request", e);
+        } catch (SystemException e) {
+            logger.logErrorWithException(LOG, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve accounts", e);
         }
     }
 
     @GetMapping (value = "/{id}")
-    public ResponseEntity<Account> findById(@PathVariable("id") Long id){
-        logger.info("performing find account by id request...");
-        try {
-            Account account = accountService.findById(id);
-            if (account == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
-            }
-            return ResponseEntity.ok(account);
-        } catch (Exception e) {
-            logger.error("Error occurred while handling find by id request", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve account", e);
+    public ResponseEntity<Account> findById(@PathVariable("id") final Long id){
+
+        if(id == null || id <= 0){
+            throw new IllegalArgumentException("ID must be positive");
         }
+        final Account account = accountService.findById(id);
+        if (account == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        }
+        return ResponseEntity.ok(account);
     }
 }

@@ -12,5 +12,5 @@ import java.util.List;
 public interface IAccountService {
     List<Account> findAll();
 
-    Account findById(Long id);
+    Account findById(final Long id);
 }

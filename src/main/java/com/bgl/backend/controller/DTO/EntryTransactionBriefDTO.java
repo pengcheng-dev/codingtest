@@ -11,7 +11,7 @@ import java.math.BigDecimal;
  * DTO defined for list display, only include common fields in an entry transaction entity
  */
 @Data
-public class EntryTransactionBrief {
+public class EntryTransactionBriefDTO {
 
     private Long id;
 

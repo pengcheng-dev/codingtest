@@ -1,5 +1,6 @@
 package com.bgl.backend.dao;
 
+import com.bgl.backend.dao.projection.EntryTransactionBriefProjection;
 import com.bgl.backend.model.*;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
@@ -23,12 +24,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EntryTransactionRepositoryTest {
 
     @Autowired
-    private EntryTransactionRepository entryTransactionRepository;
+    private transient EntryTransactionRepository entryTransactionRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private transient AccountRepository accountRepository;
 
-    private Long accountId = null;
+    private transient Long accountId = null;
 
     @BeforeEach
     @Transactional
@@ -57,7 +58,7 @@ public class EntryTransactionRepositoryTest {
 
     @Test
     public void testFindAll(){
-        List entryTransactionList = entryTransactionRepository.findAll();
+        final List entryTransactionList = entryTransactionRepository.findAll();
         assert(entryTransactionList.isEmpty());
     }
 
@@ -65,16 +66,16 @@ public class EntryTransactionRepositoryTest {
     @Transactional
     public void testSaveBasicBankEntry(){
         //given
-        BasicBankEntry entry = new BasicBankEntry();
+        final BasicBankEntry entry = new BasicBankEntry();
         entry.setAmount(new BigDecimal("10.50"));
         entry.setGstAmount(new BigDecimal("12.50"));
         entry.setField1("_blank");
 
         //the incomplete account object will be cached
-        Account account = new Account();
+        final Account account = new Account();
         account.setId(accountId);
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
         et.setEntry(entry);
         et.setAccount(account);
 
@@ -84,7 +85,7 @@ public class EntryTransactionRepositoryTest {
         et.setTransactionDate(LocalDate.now());
 
         //when
-        EntryTransaction savedET = entryTransactionRepository.save(et);
+        final EntryTransaction savedET = entryTransactionRepository.save(et);
 
         //then
         assertNotNull(savedET.getId());
@@ -98,16 +99,16 @@ public class EntryTransactionRepositoryTest {
     @Transactional
     public void testSaveInvestmentEntry(){
         //given
-        InvestmentEntry entry = new InvestmentEntry();
+        final InvestmentEntry entry = new InvestmentEntry();
         entry.setAmount(new BigDecimal("10.50"));
         entry.setGstAmount(new BigDecimal("12.50"));
         entry.setField1("_blank");
 
         //the incomplete account object will be cached
-        Account account = new Account();
+        final Account account = new Account();
         account.setId(accountId);
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
         et.setEntry(entry);
         et.setAccount(account);
 
@@ -117,7 +118,7 @@ public class EntryTransactionRepositoryTest {
         et.setTransactionDate(LocalDate.now());
 
         //when
-        EntryTransaction savedET = entryTransactionRepository.save(et);
+        final EntryTransaction savedET = entryTransactionRepository.save(et);
 
         //then
         assertNotNull(savedET.getId());
@@ -131,16 +132,16 @@ public class EntryTransactionRepositoryTest {
     @Transactional
     public void testSaveAndDelete(){
         //given
-        InvestmentEntry entry = new InvestmentEntry();
+        final InvestmentEntry entry = new InvestmentEntry();
         entry.setAmount(new BigDecimal("10.50"));
         entry.setGstAmount(new BigDecimal("12.50"));
         entry.setField1("_blank");
 
         //the incomplete account object will be cached
-        Account account = new Account();
+        final Account account = new Account();
         account.setId(accountId);
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
         et.setEntry(entry);
         et.setAccount(account);
 
@@ -150,9 +151,9 @@ public class EntryTransactionRepositoryTest {
         et.setTransactionDate(LocalDate.now());
 
         //when
-        EntryTransaction savedET = entryTransactionRepository.save(et);
+        final EntryTransaction savedET = entryTransactionRepository.save(et);
         entryTransactionRepository.deleteById(savedET.getId());
-        Optional<EntryTransaction> optional = entryTransactionRepository.findById(savedET.getId());
+        final Optional<EntryTransaction> optional = entryTransactionRepository.findById(savedET.getId());
 
         //then
         assertTrue(optional.isEmpty());
@@ -162,14 +163,14 @@ public class EntryTransactionRepositoryTest {
     @Transactional
     public void testSaveAndFindById(){
         //given
-        InvestmentEntry entry = new InvestmentEntry();
+        final InvestmentEntry entry = new InvestmentEntry();
         entry.setAmount(new BigDecimal("10.50"));
         entry.setGstAmount(new BigDecimal("12.50"));
         entry.setField1("_blank");
 
-        Account account = accountRepository.findById(accountId).get();
+        final Account account = accountRepository.findById(accountId).get();
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
         et.setEntry(entry);
         et.setAccount(account);
 
@@ -179,8 +180,8 @@ public class EntryTransactionRepositoryTest {
         et.setTransactionDate(LocalDate.now());
 
         //when
-        EntryTransaction savedET = entryTransactionRepository.save(et);
-        Optional<EntryTransaction> optional = entryTransactionRepository.findById(savedET.getId());
+        final EntryTransaction savedET = entryTransactionRepository.save(et);
+        final Optional<EntryTransaction> optional = entryTransactionRepository.findById(savedET.getId());
 
         //then
         assert(optional.isPresent());
@@ -196,14 +197,14 @@ public class EntryTransactionRepositoryTest {
     @Transactional
     public void testSaveAndUpdate(){
         //given
-        InvestmentEntry entry = new InvestmentEntry();
+        final InvestmentEntry entry = new InvestmentEntry();
         entry.setAmount(new BigDecimal("10.50"));
         entry.setGstAmount(new BigDecimal("12.50"));
         entry.setField1("_blank");
 
-        Account account = accountRepository.findById(accountId).get();
+        final Account account = accountRepository.findById(accountId).get();
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
         et.setEntry(entry);
         et.setAccount(account);
 
@@ -212,16 +213,16 @@ public class EntryTransactionRepositoryTest {
         et.setType("sample");
         et.setTransactionDate(LocalDate.now());
 
-        EntryTransaction savedET = entryTransactionRepository.save(et);
+        final EntryTransaction savedET = entryTransactionRepository.save(et);
 
         //when
-        DividendEntry newEntry = new DividendEntry();
+        final DividendEntry newEntry = new DividendEntry();
         newEntry.setAmount(new BigDecimal("11.50"));
         newEntry.setGstAmount(new BigDecimal("13.50"));
         newEntry.setField1("_blank");
 
         savedET.setEntry(newEntry);
-        EntryTransaction updatedET = entryTransactionRepository.save(savedET);
+        final EntryTransaction updatedET = entryTransactionRepository.save(savedET);
 
         //then
         assertEquals("123456", updatedET.getFundId());
@@ -233,7 +234,7 @@ public class EntryTransactionRepositoryTest {
 
     @Test
     public void testFindAllBriefs(){
-        Page<EntryTransaction> page = entryTransactionRepository.findAllBriefs(PageRequest.of(0, 10));
+        final Page<EntryTransactionBriefProjection> page = entryTransactionRepository.findAllBriefs(PageRequest.of(0, 10));
         assertNotNull(page);
         assertEquals(0, page.getTotalPages());
         assertEquals(0, page.getTotalElements());
@@ -242,16 +243,16 @@ public class EntryTransactionRepositoryTest {
     @Test
     public void testSaveAndFindAllBriefs(){
         //given
-        BasicBankEntry entry = new BasicBankEntry();
+        final BasicBankEntry entry = new BasicBankEntry();
         entry.setAmount(new BigDecimal("10.50"));
         entry.setGstAmount(new BigDecimal("12.50"));
         entry.setField1("_blank");
 
         //the incomplete account object will be cached
-        Account account = new Account();
+        final Account account = new Account();
         account.setId(accountId);
 
-        EntryTransaction et = new EntryTransaction();
+        final EntryTransaction et = new EntryTransaction();
         et.setEntry(entry);
         et.setAccount(account);
 
@@ -260,19 +261,19 @@ public class EntryTransactionRepositoryTest {
         et.setType("sample");
         et.setTransactionDate(LocalDate.now());
 
-        EntryTransaction savedET = entryTransactionRepository.save(et);
+        final EntryTransaction savedET = entryTransactionRepository.save(et);
 
         //when
-        Page<EntryTransaction> page = entryTransactionRepository.findAllBriefs(PageRequest.of(0, 10));
+        final Page<EntryTransactionBriefProjection> page = entryTransactionRepository.findAllBriefs(PageRequest.of(0, 10));
         assertEquals(1, page.getTotalElements());
-        Optional<EntryTransaction> optional = page.stream().findFirst();
+        final Optional<EntryTransactionBriefProjection> optional = page.stream().findFirst();
 
         assertTrue(optional.isPresent());
 
         assertNotNull(optional.get().getId());
         assertEquals("123456", optional.get().getFundId());
-        assertNotNull(optional.get().getEntry().getId());
-        assertEquals("BasicBank", optional.get().getEntry().getEntryType());
-        assertEquals(new BigDecimal("10.50"), optional.get().getEntry().getAmount());
+        assertNotNull(optional.get().getEntryId());
+        assertEquals("BasicBank", optional.get().getEntryType());
+        assertEquals(new BigDecimal("10.50"), optional.get().getEntryAmount());
     }
 }

@@ -1,10 +1,13 @@
 package com.bgl.backend.controller;
 
+import com.bgl.backend.common.exception.SystemException;
+import com.bgl.backend.common.logging.LoggerWrapper;
 import com.bgl.backend.controller.DTO.EntityDTOConvertor;
 import com.bgl.backend.controller.DTO.validation.Create;
-import com.bgl.backend.controller.DTO.EntryTransactionBrief;
-import com.bgl.backend.controller.DTO.EntryTransactionDetail;
+import com.bgl.backend.controller.DTO.EntryTransactionBriefDTO;
+import com.bgl.backend.controller.DTO.EntryTransactionDetailDTO;
 import com.bgl.backend.controller.DTO.validation.Update;
+import com.bgl.backend.dao.projection.EntryTransactionBriefProjection;
 import com.bgl.backend.model.EntryTransaction;
 import com.bgl.backend.service.IEntryTransactionService;
 import jakarta.validation.groups.Default;
@@ -30,10 +33,12 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping (value = "/entrytransaction")
 public class EntryTransactionController {
 
-    private static final Logger logger = LoggerFactory.getLogger(EntryTransactionController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EntryTransactionController.class);
+    @Autowired
+    private transient LoggerWrapper loggerWrapper;
 
     @Autowired
-    IEntryTransactionService entryTransactionService;
+    private transient IEntryTransactionService entryTransactionService;
 
     /**
      * RESTful API for query a dedicated entry transaction
@@ -41,17 +46,16 @@ public class EntryTransactionController {
      * @return EntryTransactionDetail DTO
      */
     @GetMapping (value = "/{id}")
-    public ResponseEntity<EntryTransactionDetail> findById(@PathVariable("id") Long id){
-        logger.info("performing find entry transaction by id request");
+    public ResponseEntity<EntryTransactionDetailDTO> findById(@PathVariable("id") final Long id){
         try {
-            EntryTransaction entryTransaction = entryTransactionService.findDetailById(id);
+            final EntryTransaction entryTransaction = entryTransactionService.findDetailById(id);
             if (entryTransaction == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "EntryTransaction not found");
             }
-            EntryTransactionDetail detailDTO = EntityDTOConvertor.mapToDetailDTO(entryTransaction);
+            final EntryTransactionDetailDTO detailDTO = EntityDTOConvertor.mapEntityToDetailDTO(entryTransaction);
             return ResponseEntity.ok(detailDTO);
-        } catch (Exception e) {
-            logger.error("Error occurred while handling find by id request", e);
+        } catch (SystemException e) {
+            loggerWrapper.logErrorWithException(LOG, "Error occurred while handling find by id request", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve entry transaction", e);
         }
     }
@@ -62,14 +66,16 @@ public class EntryTransactionController {
      * @return Page of EntryTransactionBrief
      */
     @GetMapping (produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<EntryTransactionBrief>> findAll(@PageableDefault(size = 10) Pageable pageable){
-        logger.info("performing find all entry transactions request");
+    public ResponseEntity<Page<EntryTransactionBriefDTO>> findAll(@PageableDefault(size = 10) final Pageable pageable){
+        if(pageable == null || pageable.getPageSize() < 1 || pageable.getPageNumber() < 0) {
+            throw new IllegalArgumentException("Pageable cannot be null and page size must be positive");
+        }
         try {
-            Page<EntryTransaction> entryTransactionPage = entryTransactionService.findAllBriefs(pageable);
-            Page<EntryTransactionBrief> briefDTOs = entryTransactionPage.map(EntityDTOConvertor::mapToBriefDTO);
+            final Page<EntryTransactionBriefProjection> entryTransactionPage = entryTransactionService.findAllBriefs(pageable);
+            final Page<EntryTransactionBriefDTO> briefDTOs = entryTransactionPage.map(EntityDTOConvertor::mapEntityProjectionToBriefDTO);
             return ResponseEntity.ok(briefDTOs);
-        } catch (Exception e) {
-            logger.error("Error occurred while handling find all request", e);
+        } catch (SystemException e) {
+            loggerWrapper.logErrorWithException(LOG, "Error occurred while handling find all request", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve entry transactions", e);
         }
     }
@@ -77,19 +83,18 @@ public class EntryTransactionController {
     /**
      * RESTful API for create an entry transaction
      * receive DTO from client and convert it to entity before calling service
-     * @param entryTransactionDetail
+     * @param entryTransactionDetailDTO
      * @return EntryTransactionDetail DTO
      */
     @PostMapping
-    public ResponseEntity<EntryTransactionDetail> create(@Validated({Create.class, Default.class}) @RequestBody EntryTransactionDetail entryTransactionDetail){
-        logger.info("performing create entry transaction request");
+    public ResponseEntity<EntryTransactionDetailDTO> create(@Validated({Create.class, Default.class}) @RequestBody final EntryTransactionDetailDTO entryTransactionDetailDTO){
         try {
-            EntryTransaction entryTransaction = EntityDTOConvertor.mapToEntity(entryTransactionDetail);
-            EntryTransaction savedTransaction = entryTransactionService.save(entryTransaction);
-            EntryTransactionDetail responseDTO = EntityDTOConvertor.mapToDetailDTO(savedTransaction);
+            final EntryTransaction entryTransaction = EntityDTOConvertor.mapDetailDTOToEntity(entryTransactionDetailDTO);
+            final EntryTransaction savedTransaction = entryTransactionService.save(entryTransaction);
+            final EntryTransactionDetailDTO responseDTO = EntityDTOConvertor.mapEntityToDetailDTO(savedTransaction);
             return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error("Error occurred while handling create entry transaction request", e);
+        } catch (SystemException e) {
+            loggerWrapper.logErrorWithException(LOG, "Error occurred while handling create entry transaction request", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create entry transaction", e);
         }
     }
@@ -97,20 +102,19 @@ public class EntryTransactionController {
     /**
      * RESTful API for updating an entry transaction
      * receive DTO from client and convert it to entity before calling service
-     * @param entryTransactionDetail
+     * @param entryTransactionDetailDTO
      * @param id
      * @return EntryTransactionDetail DTO
      */
     @PutMapping (value = "/{id}")
-    public ResponseEntity<EntryTransactionDetail> update(@Validated({Update.class, Default.class}) @RequestBody EntryTransactionDetail entryTransactionDetail, @PathVariable Long id){
-        logger.info("performing update entry transaction request");
+    public ResponseEntity<EntryTransactionDetailDTO> update(@Validated({Update.class, Default.class}) @RequestBody final EntryTransactionDetailDTO entryTransactionDetailDTO, @PathVariable final Long id){
         try {
-            EntryTransaction entryTransaction = EntityDTOConvertor.mapToEntity(entryTransactionDetail);
-            EntryTransaction updatedTransaction = entryTransactionService.update(id, entryTransaction);
-            EntryTransactionDetail responseDTO = EntityDTOConvertor.mapToDetailDTO(updatedTransaction);
+            final EntryTransaction entryTransaction = EntityDTOConvertor.mapDetailDTOToEntity(entryTransactionDetailDTO);
+            final EntryTransaction updatedTransaction = entryTransactionService.update(id, entryTransaction);
+            final EntryTransactionDetailDTO responseDTO = EntityDTOConvertor.mapEntityToDetailDTO(updatedTransaction);
             return ResponseEntity.ok(responseDTO);
-        } catch (Exception e) {
-            logger.error("Error occurred while handling update entry transaction request", e);
+        } catch (SystemException e) {
+            loggerWrapper.logErrorWithException(LOG, "Error occurred while handling update entry transaction request", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update entry transaction", e);
         }
     }
@@ -121,13 +125,12 @@ public class EntryTransactionController {
      * @return HTTP_STATUS
      */
     @DeleteMapping (value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id){
-        logger.info("performing delete entry transaction request");
+    public ResponseEntity<Void> delete(@PathVariable("id") final Long id){
         try {
             entryTransactionService.delete(id);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            logger.error("Error occurred while handling delete entry transaction request", e);
+        } catch (SystemException e) {
+            loggerWrapper.logErrorWithException(LOG, "Error occurred while handling delete entry transaction request", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete entry transaction", e);
         }
     }
