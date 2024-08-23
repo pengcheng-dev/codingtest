@@ -10,6 +10,7 @@ Before you begin, ensure you have met the following requirements:
 - MySQL Server 8
 - Node.js and npm
 - Maven 3
+- Docker Desktop
 
 ## Installation
 
@@ -21,6 +22,26 @@ Follow these steps to get your development environment running:
 git clone https://github.com/pengcheng-dev/codingtest.git
 ```
 
+### Set Up using Docker Desktop
+```bash
+cd codingtest
+```
+Build Images:
+```bash
+docker-compose build
+```
+Run Containers:
+```bash
+docker-compose up
+```
+Access the application at: `http://localhost:3000`.
+
+Stop the Application:
+```bash
+docker-compose down
+```
+
+### Set Up manually step by step
 ### Set Up the Backend
 
 Navigate to the tools directory:
