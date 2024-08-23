@@ -1,68 +1,76 @@
 import axios from 'axios';
 
-// Environment-specific API base URL configuration
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/entrytransaction';
+//environment viarable for API base URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
-axios.defaults.baseURL = API_BASE_URL;
-axios.defaults.headers.common['Accept'] = 'application/json';
-axios.defaults.headers.get['Content-Type'] = 'application/json';
-axios.defaults.headers.post['Content-Type'] = 'application/json';
-axios.defaults.headers.put['Content-Type'] = 'application/json';
-axios.defaults.headers.delete['Content-Type'] = 'application/json';
-axios.defaults.timeout = 30000; // Set a global timeout of 30 seconds
+const apiClient = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    timeout: 3000, // 3 seconds timeout
+});
 
-class EntryTransactionService {
+//handling errors globally
+apiClient.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response) {
+            const status = error.response.status;
+            let errorMessage = 'An error occurred';
 
-    constructor() {
-        // Handle global axios errors
-        axios.interceptors.response.use(this.handleSuccess, this.handleError);
+            if (status === 404) {
+                errorMessage = 'Resource not found (404).';
+            } else if (status === 500) {
+                errorMessage = 'Internal server error (500). Please try again later.';
+            } else {
+                errorMessage = `Unexpected error (${status}): ${error.response.data.message || error.message}`;
+            }
+
+            return Promise.reject(new Error(errorMessage));
+        } else if (error.request) {
+            console.error('Network Error:', error.message);
+            return Promise.reject(new Error('Network error: Please check your internet connection.'));
+        } else {
+            console.error('Error:', error.message);
+            return Promise.reject(new Error(`Error: ${error.message}`));
+        }
     }
+);
 
-    handleSuccess(response) {
-        return response;
+//retry
+const retryRequest = async (fn, retries = 3, delay = 1000) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fn();
+        } catch (error) {
+            if (i < retries - 1) {
+                console.warn(`Retrying request (${i + 1}/${retries})...`);
+                await new Promise(res => setTimeout(res, delay));
+            } else {
+                throw error;
+            }
+        }
     }
+};
 
-    handleError(error) {
-        // Generic error handling
-        console.error("Error in API call", error);
-        return Promise.reject(error);
-    }
+//service methods
+const EntryTransactionService = {
+    // EntryTransaction endpoints
+    getAll: (page, size) => retryRequest(() => apiClient.get(`/entrytransaction?page=${page}&size=${size}`)),
 
-    getAll(page = 0, size = 10) {
-        // Fetch all entries with pagination
-        return axios.get('', {
-            params: { page, size }
-        });
-    }
+    getById: id => retryRequest(() => apiClient.get(`/entrytransaction/${id}`)),
 
-    getById(id) {
-        // Fetch a single entry by ID
-        return axios.get(`/${id}`);
-    }
+    create: data => retryRequest(() => apiClient.post('/entrytransaction', data)),
 
-    create(entryTransaction) {
-        // Create a new entry
-        return axios.post('', entryTransaction);
-    }
+    update: (id, data) => retryRequest(() => apiClient.put(`/entrytransaction/${id}`, data)),
 
-    update(id, entryTransaction) {
-        // Update an existing entry
-        return axios.put(`/${id}`, entryTransaction);
-    }
+    delete: id => retryRequest(() => apiClient.delete(`/entrytransaction/${id}`)),
 
-    delete(id) {
-        // Delete an entry
-        return axios.delete(`/${id}`);
-    }
-    
-    fetchAccounts = () => {
-        return axios.get("http://localhost:8080/accounts");
-    };
+    // Account endpoints
+    fetchAccounts: () => retryRequest(() => apiClient.get('/accounts')),
 
-    fetchAccount(accountId) {
-        return axios.get("http://localhost:8080/accounts" + `/${accountId}`);
-    };
+    fetchAccount: accountId => retryRequest(() => apiClient.get(`/accounts/${accountId}`)),
+};
 
-}
-
-export default new EntryTransactionService();
+export default EntryTransactionService;

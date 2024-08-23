@@ -116,6 +116,7 @@ const EntryTransactionForm = () => {
     const [accountIncrementalId, setAccountIncrementalId] = useState('');
     const [accountDetails, setAccountDetails] = useState({});
     const [initialValues, setInitialValues] = useState(getInitialValues(false));
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (id) {
@@ -126,7 +127,8 @@ const EntryTransactionForm = () => {
                     setInitialValues(getInitialValues(true, response.data));
                     handleAccountChange(response.data.accountIncrementalId); 
                 })
-                .catch(error => console.error('Error fetching details', error));
+                .catch(error => handleError(error, navigate, setError));
+                
         }
 
         EntryTransactionService.fetchAccounts()
@@ -149,6 +151,24 @@ const EntryTransactionForm = () => {
             .catch(error => console.error('Error fetching account details', error));
     };
 
+    const handleError = (error, navigate, setError) => {
+        if (error.response) {
+            if (error.response.status === 404) {
+                navigate('/not-found');
+            } else if (error.response.status === 500) {
+                setError('Internal server error (500). Please try again later.');
+            } else {
+                setError(`Unexpected error: ${error.response.status}. Please try again later.`);
+            }
+        } else {
+            setError('Network error. Please check your connection.');
+        }
+    };
+    
+    if (error) {
+        return <div className={styles.error}>{error}</div>;
+    }
+
     return (
         <Formik
         initialValues={initialValues}
@@ -163,10 +183,10 @@ const EntryTransactionForm = () => {
             const action = id ? EntryTransactionService.update(id, values) : EntryTransactionService.create(values);
             action.then(() => {
                 navigate('/');
-                setSubmitting(false);
             }).catch(error => {
                 console.error('Failed to process form', error);
-                setErrors({ submit: 'Failed to process the form.' });
+                setErrors({ submit: 'Failed to process the form. Please try again.' });
+            }).finally(() => {
                 setSubmitting(false);
             });
         }}
@@ -278,7 +298,8 @@ const EntryTransactionForm = () => {
                     </div>
                 </div>
                 
-                <button type="submit" className={styles.button}>{id ? 'Update' : 'Create'}</button>
+                <button type="submit" className={styles.button} disabled={formik.isSubmitting}>{id ? 'Update' : 'Create'}</button>
+                <ErrorMessage name="submit" component="div" className={styles.error} />
             </Form>
             )}
 

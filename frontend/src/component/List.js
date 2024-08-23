@@ -8,6 +8,7 @@ const EntryTransactionList = () => {
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const pageSize = 10;
+    
 
     useEffect(() => {
         loadEntryTransactions(currentPage);
@@ -18,7 +19,7 @@ const EntryTransactionList = () => {
             const response = await EntryTransactionService.getAll(page, pageSize);
             setEntryTransactions(response.data.content);
         } catch (err) {
-            setError('Failed to fetch data');
+            handleError(err);
         }
     };
 
@@ -27,7 +28,22 @@ const EntryTransactionList = () => {
             await EntryTransactionService.delete(id);
             loadEntryTransactions(currentPage); // Refresh the list
         } catch (err) {
-            setError('Failed to delete entry');
+            handleError(err);
+        }
+    };
+
+    const handleError = (err) => {
+        if (err.response) {
+            const status = err.response.status;
+            if (status === 404) {
+                setError('Resource not found (404).');
+            } else if (status === 500) {
+                setError('Internal server error (500). Please try again later.');
+            } else {
+                setError(`Unexpected error: ${status}. Please try again later.`);
+            }
+        } else {
+            setError('Network error. Please check your connection.');
         }
     };
 
@@ -35,7 +51,7 @@ const EntryTransactionList = () => {
         <div>
             <h1>Entry Transactions</h1>
             <Link to="/create"><button>Create New EntryTransaction</button></Link>
-            {error && <p>{error}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
             <table>
                 <thead>
                     <tr>
