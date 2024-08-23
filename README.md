@@ -23,17 +23,27 @@ git clone https://github.com/pengcheng-dev/codingtest.git
 
 ### Set Up the Backend
 
+Navigate to the tools directory:
+```bash
+cd codingtest/tools
+```
+Generate encrypted password for mysql:
+```bash
+java -cp jasypt-1.9.3.jar org.jasypt.intf.cli.JasyptPBEStringEncryptionCLI input="yourMySQLPassword" password="yourSecretKey" algorithm=PBEWithMD5AndTripleDES
+```
+
 Navigate to the backend directory:
 ```bash
-cd codingtest
+cd codingtest/backend
 ```
 
 Adjust the `src/main/resources/application.properties` for your database configuration:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/your_database_name
+jasypt.encryptor.password=yourSecretKey
+spring.datasource.url=jdbc:mysql://localhost:3306/your_database_name?useSSL=false&allowPublicKeyRetrieval=true
 spring.datasource.username=your_username
-spring.datasource.password=your_password
+spring.datasource.password=ENC(encrypted_password)
 ```
 
 Build the project with Maven:
@@ -46,7 +56,7 @@ Run the application:
 
 ```bash
 cd target
-java -jar codingtest-1.0-SNAPSHOT.jar
+java -jar backend-1.0-SNAPSHOT.jar
 ```
 
 The backend should now be running on `http://localhost:8080`.
@@ -85,7 +95,7 @@ Use the application to create, read, update, and delete `TEntryTransaction` reco
 To run backend tests:
 
 ```bash
-cd codingtest
+cd codingtest/backend
 ./mvn test
 ```
 
