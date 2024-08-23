@@ -1,6 +1,7 @@
 package com.bgl.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -41,6 +42,7 @@ public class EntryTransaction implements Cloneable{
     @Column (name = "type", nullable = false)
     private String type;
 
+    @Positive
     @Column (name = "amount", nullable = false)
     private BigDecimal amount;
 
@@ -60,7 +62,6 @@ public class EntryTransaction implements Cloneable{
     public EntryTransaction clone() {
         try {
             EntryTransaction clone = (EntryTransaction) super.clone();
-            // TODO: copy mutable state here, so the clone can't change the internals of the original
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

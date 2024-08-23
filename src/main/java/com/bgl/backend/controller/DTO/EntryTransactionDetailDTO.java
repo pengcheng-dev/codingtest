@@ -2,10 +2,13 @@ package com.bgl.backend.controller.DTO;
 
 import com.bgl.backend.controller.DTO.validation.Create;
 import com.bgl.backend.controller.DTO.validation.Update;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
@@ -73,7 +76,12 @@ public class EntryTransactionDetailDTO {
     @NotBlank
     private String entryType;
 
+    @Schema(
+        description = "A map containing dynamic name-value pairs based on the entry type. " +
+            "The keys and values vary depending on the specific entry type.",
+        example = "{ 'field1': 'value1', 'field2': 'value2' }"
+    )
     //additional fields for sub entries
-
     private Map<String, ?> nameValueMap;
+
 }

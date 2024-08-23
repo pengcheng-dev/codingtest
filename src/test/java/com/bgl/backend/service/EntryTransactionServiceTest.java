@@ -6,6 +6,7 @@ import com.bgl.backend.model.BasicBankEntry;
 import com.bgl.backend.model.EntryTransaction;
 import com.bgl.backend.dao.EntryTransactionRepository;
 import com.bgl.backend.service.impl.EntryTransactionService;
+import java.lang.reflect.Field;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,9 +33,16 @@ public class EntryTransactionServiceTest {
     @InjectMocks
     private transient EntryTransactionService entryTransactionService;
 
+    private final int maximumPageSize = 50;
+
     @BeforeEach
-    public void setup() {
+    public void setup() throws Exception{
         MockitoAnnotations.openMocks(this);
+
+        // Use reflection to set the private field
+        Field maxPageSizeField = EntryTransactionService.class.getDeclaredField("maximumPageSize");
+        maxPageSizeField.setAccessible(true);
+        maxPageSizeField.set(entryTransactionService, maximumPageSize);
     }
 
     @Test
@@ -178,8 +186,8 @@ public class EntryTransactionServiceTest {
     }
 
     @Test
-    public void testFindAllBriefs() {
-        final Page<EntryTransactionBriefProjection> page = new PageImpl<EntryTransactionBriefProjection>(Arrays.asList());
+    public void testFindAllBriefs_validPageable() {
+        final Page<EntryTransactionBriefProjection> page = new PageImpl<>(Arrays.asList());
         when(entryTransactionRepository.findAllBriefs(any(Pageable.class))).thenReturn(page);
 
         final Page<EntryTransactionBriefProjection> result = entryTransactionService.findAllBriefs(PageRequest.of(0, 10));
@@ -187,5 +195,53 @@ public class EntryTransactionServiceTest {
         assertEquals(0, result.getContent().size());
 
         verify(entryTransactionRepository).findAllBriefs(any(Pageable.class));
+    }
+
+    @Test
+    public void testFindAllBriefs_nullPageable() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            entryTransactionService.findAllBriefs(null);
+        });
+
+        String expectedMessage = "Pageable cannot be null and page size must be positive";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testFindAllBriefs_invalidPageSizeTooSmall() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            entryTransactionService.findAllBriefs(PageRequest.of(0, 0));
+        });
+
+        String expectedMessage = "Page size must not be less than one";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testFindAllBriefs_invalidPageSizeTooLarge() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            entryTransactionService.findAllBriefs(PageRequest.of(0, maximumPageSize + 1));
+        });
+
+        String expectedMessage = "Pageable cannot be null and page size must be positive";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testFindAllBriefs_negativePageNumber() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            entryTransactionService.findAllBriefs(PageRequest.of(-1, 10));
+        });
+
+        String expectedMessage = "Page index must not be less than zero";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
     }
 }

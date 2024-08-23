@@ -7,6 +7,7 @@ import com.bgl.backend.model.EntryTransaction;
 import com.bgl.backend.service.IEntryTransactionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,10 +28,13 @@ public class EntryTransactionService implements IEntryTransactionService {
     @Autowired
     private transient EntryTransactionRepository entryTransactionRepository;
 
+    @Value("${pagination.pagesize.max}")
+    private int maximumPageSize;
+
     /**
      * save an entry transaction, all fields must be valid
-     * @param entryTransaction
-     * @return EntryTransaction
+     * @param entryTransaction entry transaction entity
+     * @return EntryTransaction entry transaction entity
      */
     @Transactional
     @Override
@@ -42,16 +46,14 @@ public class EntryTransactionService implements IEntryTransactionService {
     /**
      * update an entry transaction record, when entry type changed, the original entry subtype need to be deleted,
      * and new subtype entry will be created and associated with the entry transaction
-     * @param id
-     * @param entryTransaction
-     * @return EntryTransaction
-     * @throws SystemException
+     * @param id entry transaction id
+     * @param entryTransaction entry transaction entity
+     * @return EntryTransaction entry transaction entity
      */
     @Override
     @Transactional
     public EntryTransaction update(final Long id, final EntryTransaction entryTransaction) {
         validateTransaction(entryTransaction, false);
-
 
         final Optional<EntryTransaction> existingTransaction = entryTransactionRepository.findById(id);
 
@@ -65,6 +67,7 @@ public class EntryTransactionService implements IEntryTransactionService {
             transactionToUpdate.setAmount(entryTransaction.getAmount());
             transactionToUpdate.setFundId(entryTransaction.getFundId());
 
+            //Set relationship with entry and account
             transactionToUpdate.setEntry(entryTransaction.getEntry());
             transactionToUpdate.setAccount(entryTransaction.getAccount());
 
@@ -93,7 +96,7 @@ public class EntryTransactionService implements IEntryTransactionService {
 
     /**
      * business logic of query an entry transaction, validate id
-     * @param id
+     * @param id entry transaction id
      * @return EntryTransaction
      */
     @Override
@@ -106,12 +109,12 @@ public class EntryTransactionService implements IEntryTransactionService {
 
     /**
      * business logic of query a page of entry transaction
-     * @param pageable
+     * @param pageable Pageable object
      * @return Page of EntryTransaction
      */
     @Override
     public Page<EntryTransactionBriefProjection> findAllBriefs(final Pageable pageable) {
-        if(pageable == null || pageable.getPageSize() < 1 || pageable.getPageNumber() < 0) {
+        if(null == pageable || pageable.getPageSize() < 1 || pageable.getPageSize() > maximumPageSize || pageable.getPageNumber() < 0) {
             throw new IllegalArgumentException("Pageable cannot be null and page size must be positive");
         }
         return entryTransactionRepository.findAllBriefs(pageable);
@@ -119,7 +122,7 @@ public class EntryTransactionService implements IEntryTransactionService {
 
     /**
      * a common validation method to validate all fields stand to the design
-     * @param entryTransaction
+     * @param entryTransaction entry transaction entity
      * @param forSave or for update
      */
     private void validateTransaction(final EntryTransaction entryTransaction, final boolean forSave) {

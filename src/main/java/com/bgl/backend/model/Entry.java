@@ -1,6 +1,7 @@
 package com.bgl.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -21,9 +22,11 @@ public class Entry {
     @Column (name = "id")
     private Long id;
 
+    @Positive
     @Column (name = "amount", nullable = false)
     private BigDecimal amount;
 
+    @Positive
     @Column (name = "gstAmount", nullable = false)
     private BigDecimal gstAmount;
 
